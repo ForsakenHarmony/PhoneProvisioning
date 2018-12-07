@@ -112,7 +112,7 @@ async function update_phones(company) {
 
       try {
         const phoneIp = p.ip.split(".");
-        const localIp = ips.filter(
+        const localIp = ips.find(
           ip =>
             ip[0] === phoneIp[0] && ip[1] === phoneIp[1] && ip[2] === phoneIp[2]
         )[0];

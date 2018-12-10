@@ -8,7 +8,8 @@ import { CompanyInput } from "./types/company-input";
 export class CompanyResolver {
   constructor(
     @InjectRepository(Company) private readonly companyRepository: Repository<Company>
-  ) {}
+  ) {
+  }
 
   @Query(returns => [Company])
   companies(): Promise<Company[]> {
@@ -16,7 +17,7 @@ export class CompanyResolver {
   }
 
   @Query(returns => Company, { nullable: true })
-  company(@Arg("companyId", type => ID) companyId: string) {
+  async company(@Arg("companyId", type => ID) companyId: string) {
     return this.companyRepository.findOne(companyId);
   }
 

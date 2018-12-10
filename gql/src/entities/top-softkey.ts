@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Field, ID, ObjectType } from "type-graphql";
-import { Lazy, SoftkeyTypes } from "../helpers";
+import { Lazy } from "../helpers";
 import { Phone } from "./phone";
-import { IsIn } from "class-validator";
+import { SoftkeyTypes } from "../constants";
 
 @Entity()
 @ObjectType()

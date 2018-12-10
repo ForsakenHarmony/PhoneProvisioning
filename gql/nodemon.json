@@ -1,4 +1,5 @@
 {
+  "ext": "ts,js,json",
   "env": {
     "NODE_ENV": "development"
   }

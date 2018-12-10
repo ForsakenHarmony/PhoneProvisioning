@@ -1,7 +1,8 @@
-import { Phone } from "../entities/phone";
 import axios, { AxiosInstance } from "axios";
 import { URLSearchParams } from "url";
 import { networkInterfaces } from "os";
+import { PhoneNotificationPayload, PhoneStatus } from "../resolvers/types/phone-notification";
+import { Publisher } from "type-graphql";
 
 type Obj = { [key: string]: string | string[] | undefined };
 
@@ -22,21 +23,35 @@ function getLocalIps() {
     .map(iface => iface.address.split("."));
 }
 
+export interface PhoneAPIConfig {
+  id: string,
+  ip: string,
+  companyId: string,
+}
+
 export class PhoneAPI {
   private axios: AxiosInstance;
+  status: PhoneStatus = PhoneStatus.Loading;
 
-  constructor(private phone: Phone) {
+  constructor(
+    readonly config: PhoneAPIConfig,
+    private readonly publish: Publisher<PhoneNotificationPayload>
+  ) {
     this.axios = axios.create({
-      baseURL: `http://${phone.ip}`,
+      baseURL: `http://${config.ip}`,
+      timeout: 2000,
       auth: defaultCredentials
     });
+    this.check();
   }
 
   async restart() {
     await this.postUrlEncoded(
-      "/reset.html", {
+      "/reset.html",
+      {
         resetOption: "0"
-      });
+      }
+    );
   }
 
   async reset() {
@@ -49,16 +64,29 @@ export class PhoneAPI {
   }
 
   async check() {
-    await this.get("/");
+    try {
+      if (this.config.ip) {
+        await this.get("/");
+        this.status = PhoneStatus.Online;
+      } else {
+        this.status = PhoneStatus.Nonexistent;
+      }
+    } catch (e) {
+      this.status = PhoneStatus.Offline;
+    }
+    await this.publish({
+      id: this.config.id,
+      status: this.status
+    });
   }
 
   async setLocalConfigServer() {
-    const [pa, pb, pc] = this.phone.ip.split(".");
+    const [pa, pb, pc] = this.config.ip.split(".");
     const ips = getLocalIps();
     const localIp = (ips.find(([la, lb, lc]) => la === pa && lb === pb && lc === pc) || []).join(".");
 
     if (!localIp) {
-      throw new Error("Could not find shared subnet for: " + this.phone.ip);
+      throw new Error("Could not find shared subnet for: " + this.config.ip);
     }
 
     await this.postUrlEncoded("/configurationServer.html", {
@@ -68,10 +96,6 @@ export class PhoneAPI {
       httpport: "8000",
       postList: localIp
     });
-  }
-
-  private buildUrl(path: string) {
-    return `http://${this.phone.ip}${path}`;
   }
 
   private async get(path: string) {

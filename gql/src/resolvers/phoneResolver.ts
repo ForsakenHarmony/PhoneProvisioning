@@ -17,7 +17,7 @@ export class PhoneResolver {
   constructor(
     @InjectRepository(Company) private readonly companyRepository: Repository<Company>,
     @InjectRepository(Phone) private readonly phoneRepository: Repository<Phone>,
-    @InjectRepository(TopSoftkey) private readonly topSoftkeyRepository: Repository<TopSoftkey>,
+    @InjectRepository(TopSoftkey) private readonly topSoftkeyRepository: Repository<TopSoftkey>
   ) {
     setInterval(this.checkPhones.bind(this), 2000);
   }
@@ -101,6 +101,25 @@ export class PhoneResolver {
     await this.phoneRepository.save(phone);
 
     return topSoftkey;
+  }
+
+  @Mutation(returns => Boolean)
+  async resetPhone(@Arg("phoneId", type => ID) id: string, @PubSub(PhoneMessages) publish: Publisher<PhoneNotificationPayload>) {
+    if (!this.watchedPhones[id]) {
+      const phone = await this.phoneRepository.findOne(id, { relations: ["company"] });
+      if (!phone)
+        throw new Error("Invalid phone ID");
+      const { ip, company } = phone;
+      const { id: companyId } = await company;
+      this.watchedPhones[id] = new PhoneAPI({ id, ip, companyId }, publish);
+    }
+
+    const api = this.watchedPhones[id];
+
+    await api.reset();
+    await api.restart();
+
+    return true;
   }
 
   @Subscription({

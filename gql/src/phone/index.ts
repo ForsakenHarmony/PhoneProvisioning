@@ -80,7 +80,7 @@ export class PhoneAPI {
     });
   }
 
-  async setLocalConfigServer() {
+  findSharedSubnetIp() {
     const [pa, pb, pc] = this.config.ip.split(".");
     const ips = getLocalIps();
     const localIp = (ips.find(([la, lb, lc]) => la === pa && lb === pb && lc === pc) || []).join(".");
@@ -89,12 +89,25 @@ export class PhoneAPI {
       throw new Error("Could not find shared subnet for: " + this.config.ip);
     }
 
+    return localIp;
+  }
+
+  async addLocalToPushList() {
+    const localIp = this.findSharedSubnetIp();
+
+    await this.postUrlEncoded("/configurationServer.html", {
+      postList: localIp
+    });
+  }
+
+  async setLocalConfigServer() {
+    const localIp = this.findSharedSubnetIp();
+
     await this.postUrlEncoded("/configurationServer.html", {
       protocol: "HTTP",
       httpserv: localIp,
       httppath: "/",
-      httpport: "8000",
-      postList: localIp
+      httpport: "8000"
     });
   }
 

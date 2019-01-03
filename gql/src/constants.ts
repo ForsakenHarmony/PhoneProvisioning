@@ -1,6 +1,6 @@
 import { registerEnumType } from "type-graphql";
 
-export enum SoftkeyTypes {
+export enum TopSoftkeyTypes {
   None = "",
   Line = "line",
   SpeedDial = "speeddial",
@@ -32,7 +32,39 @@ export enum SoftkeyTypes {
   HotDeskLogin = "hotdesklogin",
   SpeedDialMwi = "speeddialmwi",
   DiscreetRinging = "discreetringing",
-  Empty = "empty"
+  Empty = "empty",
+}
+
+registerEnumType(TopSoftkeyTypes, {
+  name: "TopSoftkeyTypes",
+});
+
+export enum SoftkeyTypes {
+  None = "",
+  SpeedDial = "speeddial",
+  DoNotDisturb = "dnd",
+  XML = "xml",
+  Flash = "flash",
+  Spre = "spre",
+  Park = "park",
+  Pickup = "pickup",
+  Lcr = "lcr",
+  CallForward = "callforward",
+  SpeedDialXfer = "speeddialxfer",
+  SpeedDialConf = "speeddialconf",
+  Directory = "directory",
+  Filter = "filter",
+  Callers = "callers",
+  ReDial = "redial",
+  Conf = "conf",
+  Xfer = "xfer",
+  Icom = "icom",
+  PhoneLock = "phonelock",
+  Paging = "paging",
+  HotDeskLogin = "hotdesklogin",
+  DiscreetRinging = "discreetringing",
+  History = "callhistory",
+  Empty = "empty",
 }
 
 registerEnumType(SoftkeyTypes, {

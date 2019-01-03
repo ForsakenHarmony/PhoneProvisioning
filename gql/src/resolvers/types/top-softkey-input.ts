@@ -1,16 +1,20 @@
 import { Field, InputType } from "type-graphql";
 import { TopSoftkey } from "../../entities/top-softkey";
-import { SoftkeyTypes } from "../../constants";
+import { TopSoftkeyTypes } from "../../constants";
+import { DeepPartial } from "typeorm";
 
 @InputType()
-export class TopSoftkeyInput implements Partial<TopSoftkey> {
-  @Field()
-  type!: SoftkeyTypes;
+export class TopSoftkeyInput implements DeepPartial<TopSoftkey> {
+  @Field(type => TopSoftkeyTypes)
+  type!: TopSoftkeyTypes;
 
-  @Field()
+  @Field({ nullable: true })
   label?: string;
 
-  @Field()
+  @Field({ nullable: true })
   value?: string;
+
+  @Field({ nullable: true })
+  line?: number;
 }
 

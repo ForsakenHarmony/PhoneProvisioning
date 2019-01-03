@@ -1,9 +1,9 @@
 import "reflect-metadata";
-import { ApolloServer } from "apollo-server";
 import { Container } from "typedi";
 import { createConnection, useContainer as ormUseContainer } from "typeorm";
 import { SqliteConnectionOptions } from "typeorm/driver/sqlite/SqliteConnectionOptions";
 import { buildSchema, formatArgumentValidationError, useContainer as gqlUseContainer } from "type-graphql";
+import { ApolloServer } from "./server";
 
 import { CompanyResolver } from "./resolvers/companyResolver";
 import { PhoneResolver } from "./resolvers/phoneResolver";
@@ -23,7 +23,7 @@ void (async function bootstrap() {
     type: "sqlite",
     logger: "advanced-console",
     logging: "all",
-    synchronize: !isProd,
+    synchronize: !isProd
   };
 
   await createConnection(ormConfig);
@@ -38,7 +38,13 @@ void (async function bootstrap() {
     schema,
     // remember to pass `formatArgumentValidationError`
     // otherwise validation errors won't be returned to a client
-    formatError: formatArgumentValidationError
+    formatError: formatArgumentValidationError,
+    introspection: true,
+    playground: true,
+    uploads: false,
+    debug: true,
+    tracing: true,
+
   });
 
   // Start the server

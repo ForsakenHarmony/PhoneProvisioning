@@ -2,18 +2,18 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Field, ID, ObjectType } from "type-graphql";
 import { Lazy } from "../helpers";
 import { Phone } from "./phone";
-import { TopSoftkeyTypes } from "../constants";
+import { SoftkeyTypes } from "../constants";
 
 @Entity()
 @ObjectType()
-export class TopSoftkey {
+export class Softkey {
   @Field(type => ID)
   @PrimaryGeneratedColumn("uuid")
   readonly id!: string;
 
-  @Field(type => TopSoftkeyTypes)
-  @Column({ enum: TopSoftkeyTypes })
-  type!: TopSoftkeyTypes;
+  @Field(type => SoftkeyTypes)
+  @Column({ enum: Object.values(SoftkeyTypes) })
+  type!: SoftkeyTypes;
 
   @Field()
   @Column({ default: "" })
@@ -26,6 +26,26 @@ export class TopSoftkey {
   @Field()
   @Column({ default: 0 })
   line!: number;
+
+  @Field()
+  @Column({ default: true })
+  idle!: boolean;
+
+  @Field()
+  @Column({ default: true })
+  connected!: boolean;
+
+  @Field()
+  @Column({ default: true })
+  incoming!: boolean;
+
+  @Field()
+  @Column({ default: true })
+  outgoing!: boolean;
+
+  @Field()
+  @Column({ default: true })
+  busy!: boolean;
 
   @Field(type => Phone)
   @ManyToOne(type => Phone, { lazy: true })

@@ -6,7 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "nodemon -x ts-node ."
+    "dev": "nodemon -x ts-node .",
+    "build": "tsc"
   },
   "dependencies": {
     "apollo-server": "^2.2.3",

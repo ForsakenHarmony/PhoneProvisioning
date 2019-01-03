@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "target": "es2016",
+    "target": "esnext",
     "module": "commonjs",
-    "lib": ["es2016", "esnext.asynciterable", "es2017.object"],
+    "lib": [
+      "es2016",
+      "esnext",
+      "esnext.asynciterable",
+      "es2017.object"
+    ],
     "moduleResolution": "node",
     "newLine": "lf",
     "outDir": "dist",
@@ -16,5 +21,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "sourceMap": true
-  }
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

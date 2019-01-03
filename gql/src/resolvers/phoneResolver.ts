@@ -9,15 +9,20 @@ import { TopSoftkeyInput } from "./types/top-softkey-input";
 import { PhoneMessages } from "../constants";
 import { PhoneNotification, PhoneNotificationPayload, PhoneStatus } from "./types/phone-notification";
 import { PhoneAPI } from "../phone";
+import { Softkey } from "../entities/softkey";
+import { SoftkeyInput } from "./types/softkey-input";
 
 @Resolver(Phone)
 export class PhoneResolver {
   private watchedPhones: { [key: string]: PhoneAPI } = {};
+  private watchedCompanies: string[] = [];
 
   constructor(
     @InjectRepository(Company) private readonly companyRepository: Repository<Company>,
     @InjectRepository(Phone) private readonly phoneRepository: Repository<Phone>,
-    @InjectRepository(TopSoftkey) private readonly topSoftkeyRepository: Repository<TopSoftkey>
+    @InjectRepository(TopSoftkey) private readonly topSoftkeyRepository: Repository<TopSoftkey>,
+    @InjectRepository(Softkey) private readonly softkeyRepository: Repository<Softkey>,
+    @PubSub(PhoneMessages) private readonly publish: Publisher<PhoneNotificationPayload>
   ) {
     setInterval(this.checkPhones.bind(this), 2000);
   }
@@ -25,55 +30,49 @@ export class PhoneResolver {
   checkPhones() {
     Promise.all(Object.keys(this.watchedPhones).map(async id => {
       const phone = this.watchedPhones[id];
-      await phone.check();
+      if (this.watchedCompanies.includes(phone.config.companyId))
+        await phone.check();
     })).then(() => {
     });
   }
 
-  @FieldResolver(returns => PhoneStatus)
-  async status(@Root() { id, ip, company }: Phone, @PubSub(PhoneMessages) publish: Publisher<PhoneNotificationPayload>): Promise<PhoneStatus> {
-    if (!this.watchedPhones[id]) {
-      const { id: companyId } = await company;
-      this.watchedPhones[id] = new PhoneAPI({ id, ip, companyId }, publish);
-    }
+  private async getPhoneApi({ id, ip, company }: Phone): Promise<PhoneAPI> {
+    return this.watchedPhones[id] || new PhoneAPI({ id, ip, companyId: (await company).id }, this.publish);
+  }
 
-    const api = this.watchedPhones[id];
+  private async getPhoneApiById(id: string): Promise<PhoneAPI> {
+    return this.watchedPhones[id] || await this.phoneRepository.findOneOrFail(id).then(this.getPhoneApi.bind(this));
+  }
+
+  @FieldResolver(returns => PhoneStatus)
+  async status(@Root() phone: Phone): Promise<PhoneStatus> {
+    const api = await this.getPhoneApi(phone);
 
     if (api.status === PhoneStatus.Loading) {
-      await api.check();
+      return await api.check();
     }
 
+    await api.check();
     return api.status;
   }
 
   @Mutation(returns => Boolean)
-  async setActiveCompany(@Arg("companyId", type => ID) companyId: string, @PubSub(PhoneMessages) publish: Publisher<PhoneNotificationPayload>) {
-    const company = await this.companyRepository.findOne(companyId, { relations: ["phones"] });
-    if (!company)
-      throw new Error("Invalid company ID");
+  async setActiveCompany(@Arg("companyId", type => ID) companyId: string) {
+    const company = await this.companyRepository.findOneOrFail(companyId, { relations: ["phones"] });
 
-    const phones = (await company.phones);
-    await Promise.all(phones.map(async ({ id, ip, company }) => {
-      if (!this.watchedPhones[id]) {
-        const { id: companyId } = await company;
-        this.watchedPhones[id] = new PhoneAPI({ id, ip, companyId }, publish);
-      }
-    }));
-    this.checkPhones();
+    this.watchedCompanies = [ company.id ];
+
+    await Promise.all((await company.phones).map(phone => this.status(phone)));
 
     return true;
   }
 
   @Mutation(returns => Phone)
   async addPhone(@Arg("companyId", type => ID) companyId: string, @Arg("phone") phoneInput: PhoneInput): Promise<Phone> {// find the recipe
-    const company = await this.companyRepository.findOne(companyId, { relations: ["phones"] });
-    if (!company)
-      throw new Error("Invalid company ID");
+    const company = await this.companyRepository.findOneOrFail(companyId, { relations: ["phones"] });
 
     const phone = this.phoneRepository.create(phoneInput);
-
     (await company.phones).push(phone);
-
     await this.companyRepository.save(company);
 
     return phone;
@@ -81,40 +80,46 @@ export class PhoneResolver {
 
   @Mutation(returns => Phone)
   async removePhone(@Arg("phoneId", type => ID) phoneId: string): Promise<Phone> {
-    const phone = await this.phoneRepository.findOne(phoneId);
-    if (!phone)
-      throw new Error("Invalid phone ID");
+    const phone = await this.phoneRepository.findOneOrFail(phoneId);
 
     return await this.phoneRepository.remove(phone);
   }
 
   @Mutation(returns => TopSoftkey)
   async addTopSoftkey(@Arg("phoneId", type => ID) phoneId: string, @Arg("softkey") topSoftkeyInput: TopSoftkeyInput): Promise<TopSoftkey> {
-    const phone = await this.phoneRepository.findOne(phoneId, { relations: ["topSoftkeys"] });
-    if (!phone)
-      throw new Error("Invalid phone ID");
+    const phone = await this.phoneRepository.findOneOrFail(phoneId, { relations: ["topSoftkeys"] });
 
     const topSoftkey = this.topSoftkeyRepository.create(topSoftkeyInput);
-
     (await phone.topSoftkeys).push(topSoftkey);
-
     await this.phoneRepository.save(phone);
+
+    const api = await this.getPhoneApi(phone);
+    if (await api.check() === PhoneStatus.Online) {
+      await api.updateTopSoftkeys(await phone.topSoftkeys);
+    }
 
     return topSoftkey;
   }
 
-  @Mutation(returns => Boolean)
-  async resetPhone(@Arg("phoneId", type => ID) id: string, @PubSub(PhoneMessages) publish: Publisher<PhoneNotificationPayload>) {
-    if (!this.watchedPhones[id]) {
-      const phone = await this.phoneRepository.findOne(id, { relations: ["company"] });
-      if (!phone)
-        throw new Error("Invalid phone ID");
-      const { ip, company } = phone;
-      const { id: companyId } = await company;
-      this.watchedPhones[id] = new PhoneAPI({ id, ip, companyId }, publish);
+  @Mutation(returns => Softkey)
+  async addSoftkey(@Arg("phoneId", type => ID) phoneId: string, @Arg("softkey") softkeyInput: SoftkeyInput): Promise<Softkey> {
+    const phone = await this.phoneRepository.findOneOrFail(phoneId, { relations: ["softkeys"] });
+
+    const softkey = this.softkeyRepository.create(softkeyInput);
+    (await phone.softkeys).push(softkey);
+    await this.phoneRepository.save(phone);
+
+    const api = await this.getPhoneApi(phone);
+    if (await api.check() === PhoneStatus.Online) {
+      await api.updateSoftkeys(await phone.softkeys);
     }
 
-    const api = this.watchedPhones[id];
+    return softkey;
+  }
+
+  @Mutation(returns => Boolean)
+  async resetPhone(@Arg("phoneId", type => ID) id: string) {
+    const api = await this.getPhoneApiById(id);
 
     await api.reset();
     await api.restart();

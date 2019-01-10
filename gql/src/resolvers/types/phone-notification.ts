@@ -14,10 +14,10 @@ export class PhoneNotification {
 }
 
 export enum PhoneStatus {
-  Nonexistent,
-  Loading,
-  Online,
-  Offline
+  Nonexistent = "Nonexistent",
+  Loading = "Loading",
+  Online = "Online",
+  Offline = "Offline"
 }
 
 registerEnumType(PhoneStatus, {

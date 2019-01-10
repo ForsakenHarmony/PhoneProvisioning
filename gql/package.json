@@ -7,9 +7,11 @@
   "private": true,
   "scripts": {
     "dev": "nodemon -x ts-node .",
+    "debug": "nodemon -x node --inspect -r ts-node/register .",
     "build": "tsc"
   },
   "dependencies": {
+    "express": "^4.16.4",
     "apollo-server": "^2.2.3",
     "axios": "^0.18.0",
     "class-transformer": "^0.2.0",

@@ -1,4 +1,6 @@
-class DnD extends Component {
+import { Component } from "preact";
+
+export class DnD extends Component {
   state = {
     dragging: false,
     draggable: -1,
@@ -62,12 +64,14 @@ class DnD extends Component {
 
     newItems.splice(target, 0, newItems.splice(dragged, 1)[0]);
 
+    this.props.onSwap(dragged, target);
     this.props.onSort(newItems);
   }
 
   render(
     { container: Container, item: Item, items, handle: Handle, prop, onSort },
-    { dragged, dragging, over, draggable }
+    { dragged, dragging, over, draggable },
+    {}
   ) {
     let newItems = dragging && over !== dragged ? items.slice() : items;
 
@@ -81,7 +85,7 @@ class DnD extends Component {
           <Item
             key={data[prop]}
             data={data}
-            handle={
+            handle={ Handle &&
               <Handle
                 onMouseDown={this.onMouseDown.bind(this, idx)}
                 onMouseUp={this.onMouseUp.bind(this)}
@@ -101,3 +105,11 @@ class DnD extends Component {
     );
   }
 }
+
+DnD.defaultProps = {
+  container: ({ children, ...props }) => <ul {...props}>{children}</ul>,
+  item: ({ data }) => <li>{JSON.stringify(data)}</li>,
+  onSort: () => {},
+  onSwap: (from, to) => {},
+  prop: 'id',
+};

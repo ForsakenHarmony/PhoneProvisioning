@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from "type-graphql";
 import { PrimaryGeneratedColumn, Column, Entity, OneToMany, ManyToOne } from "typeorm";
-import { Matches } from 'class-validator';
+import { Matches, MaxLength } from 'class-validator';
 
 import { Lazy } from "../helpers";
 import { Company } from "./company";
@@ -31,11 +31,13 @@ export class Phone {
   @ManyToOne(type => Company, { lazy: true })
   company!: Lazy<Company>;
 
+  @MaxLength(18)
   @Field(type => [Softkey])
-  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: ["insert"]})
+  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: true, onDelete: "CASCADE" })
   softkeys!: Lazy<[Softkey]>;
 
+  @MaxLength(20)
   @Field(type => [TopSoftkey])
-  @OneToMany(type => TopSoftkey, key => key.phone, { lazy: true, cascade: ["insert"]})
+  @OneToMany(type => TopSoftkey, key => key.phone, { lazy: true, cascade: true, onDelete: "CASCADE" })
   topSoftkeys!: Lazy<[TopSoftkey]>;
 }

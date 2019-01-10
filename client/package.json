@@ -12,13 +12,17 @@
     "prettier": "^1.15.3"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.9.0",
-    "blueprint-css": "^3.0.0",
+    "@blueprintjs/core": "^3.10.0",
+    "@pql/client": "^0.2.0-alpha.1",
+    "@pql/preact": "^0.2.0-alpha.1",
+    "@pql/websocket": "^0.2.0-alpha.1",
+    "blueprint-css": "^3.1.0",
     "flexboxgrid": "^6.3.1",
-    "mobx": "^5.6.0",
-    "mobx-react": "^5.4.2",
+    "linkstate": "^1.1.1",
+    "mobx": "^5.8.0",
+    "mobx-react": "^5.4.3",
     "normalize.css": "^8.0.1",
-    "preact": "^8.2.6",
+    "preact": "^8.4.2",
     "preact-compat": "^3.17.0",
     "preact-i18n": "^1.2.2",
     "preact-router": "^2.5.7"

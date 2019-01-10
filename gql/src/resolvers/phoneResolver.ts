@@ -1,5 +1,5 @@
 import { Phone } from "../entities/phone";
-import { Arg, FieldResolver, ID, Mutation, Publisher, PubSub, Resolver, Root, Subscription } from "type-graphql";
+import { Arg, FieldResolver, ID, Mutation, Publisher, PubSub, Query, Resolver, Root, Subscription } from "type-graphql";
 import { Company } from "../entities/company";
 import { InjectRepository } from "typeorm-typedi-extensions";
 import { Repository } from "typeorm";
@@ -11,19 +11,22 @@ import { PhoneNotification, PhoneNotificationPayload, PhoneStatus } from "./type
 import { PhoneAPI } from "../phone";
 import { Softkey } from "../entities/softkey";
 import { SoftkeyInput } from "./types/softkey-input";
+import { PubSub as PubSubEngine } from 'graphql-subscriptions';
 
 @Resolver(Phone)
 export class PhoneResolver {
   private watchedPhones: { [key: string]: PhoneAPI } = {};
   private watchedCompanies: string[] = [];
+  private readonly publish: Publisher<PhoneNotificationPayload>;
 
   constructor(
     @InjectRepository(Company) private readonly companyRepository: Repository<Company>,
     @InjectRepository(Phone) private readonly phoneRepository: Repository<Phone>,
     @InjectRepository(TopSoftkey) private readonly topSoftkeyRepository: Repository<TopSoftkey>,
     @InjectRepository(Softkey) private readonly softkeyRepository: Repository<Softkey>,
-    @PubSub(PhoneMessages) private readonly publish: Publisher<PhoneNotificationPayload>
+    @PubSub() private readonly pubsub: PubSubEngine
   ) {
+    this.publish = pubsub.publish.bind(pubsub, PhoneMessages);
     setInterval(this.checkPhones.bind(this), 2000);
   }
 
@@ -37,7 +40,7 @@ export class PhoneResolver {
   }
 
   private async getPhoneApi({ id, ip, company }: Phone): Promise<PhoneAPI> {
-    return this.watchedPhones[id] || new PhoneAPI({ id, ip, companyId: (await company).id }, this.publish);
+    return this.watchedPhones[id] || (this.watchedPhones[id] = new PhoneAPI({ id, ip, companyId: (await company).id }, this.publish), this.watchedPhones[id]);
   }
 
   private async getPhoneApiById(id: string): Promise<PhoneAPI> {
@@ -54,6 +57,13 @@ export class PhoneResolver {
 
     await api.check();
     return api.status;
+  }
+
+  @Query(returns => Boolean)
+  async checkPostList(@Arg("phoneId", type => ID) phoneId: string) {
+    const api = await this.getPhoneApiById(phoneId);
+    await api.ensurePushList();
+    return true;
   }
 
   @Mutation(returns => Boolean)
@@ -81,6 +91,9 @@ export class PhoneResolver {
   @Mutation(returns => Phone)
   async removePhone(@Arg("phoneId", type => ID) phoneId: string): Promise<Phone> {
     const phone = await this.phoneRepository.findOneOrFail(phoneId);
+
+    await this.topSoftkeyRepository.remove(await phone.topSoftkeys);
+    await this.softkeyRepository.remove(await phone.softkeys);
 
     return await this.phoneRepository.remove(phone);
   }

@@ -1,10 +1,12 @@
-import axios, { AxiosInstance } from "axios";
+import { default as axiosFactory, AxiosInstance, AxiosRequestConfig } from "axios";
 import { URLSearchParams } from "url";
 import { networkInterfaces } from "os";
 import { PhoneNotificationPayload, PhoneStatus } from "../resolvers/types/phone-notification";
 import { Publisher } from "type-graphql";
 import { Softkey } from "../entities/softkey";
 import { TopSoftkey } from "../entities/top-softkey";
+import { stringify } from "querystring";
+import { parseForm, stripToContent } from "./parse-forms";
 
 type Obj = { [key: string]: string | string[] | undefined };
 
@@ -31,18 +33,51 @@ export interface PhoneAPIConfig {
   companyId: string,
 }
 
+function timeout(ms: number) {
+  return new Promise(res => {
+    setTimeout(res, ms);
+  })
+}
+
+function logFn(context: string, message: string) {
+  process.stdout.write(`[${context}] ${message}\n`);
+}
+
 export class PhoneAPI {
   private readonly axios: AxiosInstance;
   status: PhoneStatus = PhoneStatus.Loading;
 
   constructor(
     readonly config: PhoneAPIConfig,
-    private readonly publish: Publisher<PhoneNotificationPayload>
+    private readonly publish: Publisher<PhoneNotificationPayload>,
+    private readonly log: (message: string) => void = logFn.bind(null,'phone_api'),
   ) {
-    this.axios = axios.create({
+    const alog = logFn.bind(null, 'axios');
+    this.axios = axiosFactory.create({
       baseURL: `http://${config.ip}`,
       timeout: 2000,
-      auth: defaultCredentials
+      auth: defaultCredentials,
+    });
+    this.axios.interceptors.request.use(req => {
+      alog(`[->] [${req.method}] ${req.url}`);
+      return req;
+    }, err => {
+      alog(`[x>]  ${err && err.message}`);
+      return Promise.reject(err);
+    });
+    this.axios.interceptors.response.use(res => {
+      alog(`[<-] ${res.config.url} [${res.status}]`);
+      if (res.data.startsWith("<!DOCTYPE")) {
+        alog(`[<-] ${JSON.stringify(stripToContent(res.data))}`);
+      }
+      return res;
+    }, err => {
+      if (err.request) {
+        alog(`[<x] ${err.request.config.url} [${err.request.status}]`);
+      } else {
+        alog(`[xx] ${err && err.message}`);
+      }
+      return Promise.reject(err);
     });
     this.check();
   }
@@ -66,15 +101,20 @@ export class PhoneAPI {
   }
 
   async check() {
+    this.log(`check: ${this.config.id} [${this.config.ip}]`);
     try {
       if (this.config.ip) {
-        await this.get("/");
+        await this.axios.get("/");
         this.status = PhoneStatus.Online;
       } else {
         this.status = PhoneStatus.Nonexistent;
       }
     } catch (e) {
-      this.status = PhoneStatus.Offline;
+      if (e.response) {
+        this.status = PhoneStatus.Online;
+      } else {
+        this.status = PhoneStatus.Offline;
+      }
     }
     await this.publish({
       id: this.config.id,
@@ -99,12 +139,18 @@ export class PhoneAPI {
     return localIp;
   }
 
-  async addLocalToPushList() {
+  async ensurePushList() {
+    const res = await this.get('/configurationServer.html');
+    const form = parseForm(stripToContent(res.data))[0];
+    const postList = form.fields.postList;
+
     const localIp = this.findSharedSubnetIp();
 
-    await this.postUrlEncoded("/configurationServer.html", {
-      postList: localIp
-    });
+    if (!postList.includes(localIp)) {
+      await this.postUrlEncoded("/configurationServer.html", {
+        postList: postList + ',' + localIp
+      });
+    }
   }
 
   async setLocalConfigServer() {
@@ -120,22 +166,51 @@ export class PhoneAPI {
 
   async updateSoftkeys(softkeys: Softkey[]) {
     const xml = genSoftkeyXml(softkeys);
+    await this.postRpc(xml);
   }
 
   async updateTopSoftkeys(softkeys: TopSoftkey[]) {
     const xml = genTopSoftkeyXml(softkeys, []);
+    await this.postRpc(xml);
+  }
+
+  private async createOrConfirmSession(tries: number = 5): Promise<undefined> {
+    try {
+      await this.axios.get('/');
+      return;
+    } catch (e) {
+      if (!e.response) {
+        tries = 1;
+      }
+      if (tries <= 1) {
+        throw e;
+      }
+      return await this.createOrConfirmSession(tries - 1);
+    }
   }
 
   private async get(path: string) {
+    await this.createOrConfirmSession();
     return this.axios.get(path);
   }
 
-  private async post(path: string, data: any) {
-    return this.axios.post(path, data);
+  private async post(url: string, data?: any, config?: AxiosRequestConfig) {
+    await this.createOrConfirmSession();
+    return this.axios.post(url, data);
   }
 
-  private async postUrlEncoded(path: string, data: Obj) {
-    return this.post(path, new URLSearchParams(data));
+  private async postUrlEncoded(url: string, data: Obj) {
+    return this.post(url, new URLSearchParams(data));
+  }
+
+  private async postRpc(xml: string) {
+    this.log(`[RPC] ${JSON.stringify(xml)}`);
+    await this.ensurePushList();
+    return this.post('/', xml, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    })
   }
 }
 
@@ -166,7 +241,7 @@ function genSoftkeyXml(softkeys: Softkey[]) {
   const obj = {
     ...Array.from({ length: 20 }, (v, i) => i + 1)
       .map(n => ({
-        [`topsoftkey${n} type`]: ""
+        [`softkey${n} type`]: ""
       }))
       .reduce((acc, val) => Object.assign(acc, val), {}),
     ...softkeys
@@ -190,7 +265,7 @@ function genXml(obj: { [key: string]: string }) {
     ([k, v]) => `<ConfigurationItem><Parameter>${k}</Parameter><Value>${v}</Value></ConfigurationItem>`
   ).join("");
 
-  return `<AastraIPPhoneConfiguration setType="local">${items}</AastraIPPhoneConfiguration>`;
+  return `xml=<AastraIPPhoneConfiguration setType="local">${items}</AastraIPPhoneConfiguration>`;
 }
 
 // function config_to_xml(phone, list = [], offset = 0) {

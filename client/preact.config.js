@@ -12,7 +12,10 @@ export default (config, env) => {
 
   if (!env.isProd) {
     config.devServer.proxy = {
-      '/api': 'http://localhost:4000'
+      '/api': {
+        target: 'http://localhost:4000',
+        pathRewrite: {'^/api' : ''}
+      }
     };
   }
 }

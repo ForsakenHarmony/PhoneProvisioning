@@ -1,4 +1,4 @@
-type Form = {
+export type Form = {
   id: string,
   action: string,
   fields: {
@@ -6,7 +6,12 @@ type Form = {
   }
 }
 
-export function parse(doc: string) {
+export function stripToContent(body: string) {
+  const noHeader = body.split("<div id='content'>")[1].trim();
+  return noHeader.split("</div></div><div id='footer'>")[0].trim();
+}
+
+export function parseForm(doc: string) {
   const openTags = doc.match(/<[^/]+?\/?>/g);
   if (!openTags) return [];
 

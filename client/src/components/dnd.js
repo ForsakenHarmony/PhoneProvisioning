@@ -85,11 +85,13 @@ export class DnD extends Component {
           <Item
             key={data[prop]}
             data={data}
-            handle={ Handle &&
-              <Handle
-                onMouseDown={this.onMouseDown.bind(this, idx)}
-                onMouseUp={this.onMouseUp.bind(this)}
-              />
+            handle={
+              Handle && (
+                <Handle
+                  onMouseDown={this.onMouseDown.bind(this, idx)}
+                  onMouseUp={this.onMouseUp.bind(this)}
+                />
+              )
             }
             draggable={!Handle || draggable === idx}
             over={dragging && idx === over}
@@ -111,5 +113,5 @@ DnD.defaultProps = {
   item: ({ data }) => <li>{JSON.stringify(data)}</li>,
   onSort: () => {},
   onSwap: (from, to) => {},
-  prop: 'id',
+  prop: "id"
 };

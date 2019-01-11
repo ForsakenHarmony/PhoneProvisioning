@@ -1,3 +1,5 @@
+import { Intent } from "@blueprintjs/core";
+
 export const definition = {
   leave_free: "Tastenfelder frei lassen",
   phones: "Telefone",
@@ -15,6 +17,10 @@ export const definition = {
   save: "Konfig übertragen",
   no_phones: "Keine Telefone",
   create_company: "Erstellen",
+  status: "Status",
+  nonexistent: "Existiert nicht (keine IP?)",
+  online: "Online",
+  offline: "Nicht erreichbar",
   softkey: {
     "": "Kein",
     line: "Leitung",
@@ -118,11 +124,13 @@ export const TopSoftkeyTypes = {
   HotDeskLogin: "hotdesklogin",
   SpeedDialMwi: "speeddialmwi",
   DiscreetRinging: "discreetringing",
-  Empty: "empty",
+  Empty: "empty"
 };
 
 export function toTopSoftkeyEnum(val) {
-  return Object.keys(TopSoftkeyTypes)[Object.values(TopSoftkeyTypes).indexOf(val)];
+  return Object.keys(TopSoftkeyTypes)[
+    Object.values(TopSoftkeyTypes).indexOf(val)
+  ];
 }
 
 export const SoftkeyTypes = {
@@ -150,5 +158,5 @@ export const SoftkeyTypes = {
   HotDeskLogin: "hotdesklogin",
   DiscreetRinging: "discreetringing",
   History: "callhistory",
-  Empty: "empty",
+  Empty: "empty"
 };

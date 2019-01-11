@@ -1,4 +1,4 @@
-import { gql } from '@pql/client';
+import { gql } from "@pql/client";
 
 export const companies = gql`
   query companies {
@@ -10,6 +10,7 @@ export const companies = gql`
         name
         number
         ip
+        status
         topSoftkeys {
           id
           type
@@ -31,6 +32,7 @@ export const company = gql`
         name
         number
         ip
+        status
         topSoftkeys {
           id
           type
@@ -51,14 +53,32 @@ export const addCompany = gql`
 `;
 
 export const addPhone = gql`
-  mutation addPhone($name: String!) {
-    addCompany(company: { name: $name }) {
+  mutation addPhone($companyId: String!, $phone: PhoneInput!) {
+    addPhone(companyId: $companyId, phone: $phone) {
       id
+      name
+      number
+      ip
+      status
+      topSoftkeys {
+        id
+        type
+        label
+        value
+      }
     }
   }
 `;
 
 export const removePhone = gql`
+  mutation removePhone($id: ID!) {
+    removePhone(phoneId: $id) {
+      id
+    }
+  }
+`;
+
+export const updatePhone = gql`
   mutation addCompany($name: String!) {
     addCompany(company: { name: $name }) {
       id
@@ -69,8 +89,19 @@ export const removePhone = gql`
 export const phoneStatus = gql`
   subscription phoneStatus {
     phoneStatus {
-      id,
-      status,
+      phone {
+        id
+        name
+        number
+        ip
+        status
+        topSoftkeys {
+          id
+          type
+          label
+          value
+        }
+      }
       date
     }
   }

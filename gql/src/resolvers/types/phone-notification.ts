@@ -3,11 +3,8 @@ import { Phone } from "../../entities/phone";
 
 @ObjectType()
 export class PhoneNotification {
-  @Field(type => ID)
-  id!: string;
-
-  @Field()
-  status!: PhoneStatus;
+  @Field(type => Phone)
+  phone!: Phone;
 
   @Field(type => Date)
   date!: Date;
@@ -26,6 +23,5 @@ registerEnumType(PhoneStatus, {
 
 export interface PhoneNotificationPayload {
   id: string;
-  status: PhoneStatus;
 }
 

@@ -17,7 +17,7 @@ export class App {
     return (
       <IntlProvider definition={definition}>
         <Provider client={client}>
-          <Config/>
+          <Config />
         </Provider>
       </IntlProvider>
     );

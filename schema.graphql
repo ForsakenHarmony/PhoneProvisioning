@@ -20,8 +20,11 @@ type Mutation {
   addCompany(company: CompanyInput!): Company!
   setActiveCompany(companyId: ID!): Boolean!
   addPhone(phone: PhoneInput!, companyId: ID!): Phone!
+  updatePhone(phone: PhoneInput!, phoneId: ID!): Phone!
   removePhone(phoneId: ID!): Phone!
   addTopSoftkey(softkey: TopSoftkeyInput!, phoneId: ID!): TopSoftkey!
+  updateTopSoftkey(softkey: TopSoftkeyInput!, softkeyId: ID!): TopSoftkey!
+  removeTopSoftkey(softkey: TopSoftkeyInput!, softkeyId: ID!): TopSoftkey!
   addSoftkey(softkey: SoftkeyInput!, phoneId: ID!): Softkey!
   resetPhone(phoneId: ID!): Boolean!
 }
@@ -44,8 +47,7 @@ input PhoneInput {
 }
 
 type PhoneNotification {
-  id: ID!
-  status: String!
+  phone: Phone!
   date: DateTime!
 }
 

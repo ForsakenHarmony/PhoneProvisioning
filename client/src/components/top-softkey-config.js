@@ -7,7 +7,10 @@ import { isLabelDisabled, isValueDisabled } from "../utils";
 export const TopSoftkeyConfig = observer(({ softkey, set = () => {} }) => {
   return (
     <ControlGroup vertical={true}>
-      <HTMLSelect value={TopSoftkeyTypes[softkey.type]} onChange={set.bind(null, "type")}>
+      <HTMLSelect
+        value={TopSoftkeyTypes[softkey.type]}
+        onChange={set.bind(null, "type")}
+      >
         {softkeyTypes.map(type => (
           <option value={toTopSoftkeyEnum(type)}>
             <Text id={`softkey.${type}`} />

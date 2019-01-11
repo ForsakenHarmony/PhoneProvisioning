@@ -70,9 +70,8 @@ export class Store {
 
   @computed
   get dragTargets() {
-    return Array.from(
-      { length: this.company.phones.length + 1 },
-      (_, i) => (i > this.draggedId ? i - 1 : i)
+    return Array.from({ length: this.company.phones.length + 1 }, (_, i) =>
+      i > this.draggedId ? i - 1 : i
     );
   }
 
@@ -163,12 +162,12 @@ export class Phone {
   config;
 
   constructor({
-                name = "",
-                number = "",
-                ip = "",
-                config = {},
-                offset = 0
-              } = {}) {
+    name = "",
+    number = "",
+    ip = "",
+    config = {},
+    offset = 0
+  } = {}) {
     this.name = name;
     this.number = number;
     this.ip = ip;

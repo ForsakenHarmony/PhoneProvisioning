@@ -6,15 +6,16 @@ const PhoneConfigView = ({ phone }) => (
   <Card elevation={3}>
     <H5>
       {phone.name} ({phone.number})
-      <Button icon="duplicate" onClick={() => {} /*company.copyConfig.bind(null, id)*/}>
+      <Button
+        icon="duplicate"
+        onClick={() => {} /*company.copyConfig.bind(null, id)*/}
+      >
         <Text id="copy" />
       </Button>
     </H5>
     <Divider />
-    {phone.topSoftkeys.map((softkey) => (
-      <TopSoftkeyConfig
-        softkey={softkey}
-      />
+    {phone.topSoftkeys.map(softkey => (
+      <TopSoftkeyConfig softkey={softkey} />
     ))}
   </Card>
 );

@@ -78,7 +78,7 @@ export class PhoneResolver {
   }
 
   @Mutation(returns => Phone)
-  async addPhone(@Arg("companyId", type => ID) companyId: string, @Arg("phone") phoneInput: PhoneInput): Promise<Phone> {// find the recipe
+  async addPhone(@Arg("companyId", type => ID) companyId: string, @Arg("phone") phoneInput: PhoneInput): Promise<Phone> {
     const company = await this.companyRepository.findOneOrFail(companyId, { relations: ["phones"] });
 
     const phone = this.phoneRepository.create(phoneInput);
@@ -86,6 +86,15 @@ export class PhoneResolver {
     await this.companyRepository.save(company);
 
     return phone;
+  }
+
+  @Mutation(returns => Phone)
+  async updatePhone(@Arg("phoneId", type => ID) phoneId: string, @Arg("phone") phoneInput: PhoneInput): Promise<Phone> {
+    const phone = await this.phoneRepository.findOneOrFail(phoneId);
+
+    Object.assign(phone, phoneInput);
+
+    return await this.phoneRepository.save(phone);
   }
 
   @Mutation(returns => Phone)
@@ -114,6 +123,22 @@ export class PhoneResolver {
     return topSoftkey;
   }
 
+  @Mutation(returns => TopSoftkey)
+  async updateTopSoftkey(@Arg("softkeyId", type => ID) softkeyID: string, @Arg("softkey") topSoftkeyInput: TopSoftkeyInput): Promise<TopSoftkey> {
+    const topSoftkey = await this.topSoftkeyRepository.findOneOrFail(softkeyID, { relations: ["phone"] });
+
+    Object.assign(topSoftkey, topSoftkeyInput);
+
+    return await this.topSoftkeyRepository.save(topSoftkey);
+  }
+
+  @Mutation(returns => TopSoftkey)
+  async removeTopSoftkey(@Arg("softkeyId", type => ID) softkeyID: string, @Arg("softkey") topSoftkeyInput: TopSoftkeyInput): Promise<TopSoftkey> {
+    const topSoftkey = await this.topSoftkeyRepository.findOneOrFail(softkeyID, { relations: ["phone"] });
+
+    return await this.topSoftkeyRepository.remove(topSoftkey);
+  }
+
   @Mutation(returns => Softkey)
   async addSoftkey(@Arg("phoneId", type => ID) phoneId: string, @Arg("softkey") softkeyInput: SoftkeyInput): Promise<Softkey> {
     const phone = await this.phoneRepository.findOneOrFail(phoneId, { relations: ["softkeys"] });
@@ -140,12 +165,14 @@ export class PhoneResolver {
     return true;
   }
 
-  @Subscription({
+  @Subscription(type => PhoneNotification, {
     topics: PhoneMessages
   })
-  phoneStatus(@Root() payload: PhoneNotificationPayload): PhoneNotification {
+  async phoneStatus(@Root() payload: PhoneNotificationPayload): Promise<PhoneNotification> {
+    const phone = await this.phoneRepository.findOneOrFail(payload.id);
+
     return {
-      ...payload,
+      phone,
       date: new Date()
     };
   }

@@ -11,7 +11,7 @@ class ConfigView extends Component {
     selectedCompany: ""
   };
 
-  createNew = async (name) => {
+  createNew = async name => {
     const { data } = await this.props.addCompany({
       variables: {
         name: name
@@ -22,54 +22,69 @@ class ConfigView extends Component {
     });
   };
 
-  render({ loaded, data, error, addCompany }, { selectedCompany, newName }, {}) {
+  render(
+    { loaded, data, error, addCompany },
+    { selectedCompany, newName },
+    {}
+  ) {
     return (
       <div id="app">
-        <Navbar>
-          <Navbar.Group>
-            <Navbar.Heading>
-              <Text id="phone_provisioning"/>
-            </Navbar.Heading>
-            <Navbar.Divider/>
-            <HTMLSelect
-              value={selectedCompany}
-              onChange={e => this.setState({ selectedCompany: e.target.value })}
-            >
-              {!data ? (
-                <option>
-                  <Text id="loading"/>
+        <div class="column">
+          <header class="navbar">
+            <section class="navbar-section">
+              <a href="#" class="navbar-brand text-bold mr-2">
+                <Text id="phone_provisioning" />
+              </a>
+            </section>
+            <section class="navbar-section">
+              <select
+                class="form-select"
+                value={selectedCompany}
+                onChange={e =>
+                  this.setState({ selectedCompany: e.target.value })
+                }
+              >
+                {!data ? (
+                  <option>
+                    <Text id="loading" />
+                  </option>
+                ) : (
+                  data.companies.map(c => (
+                    <option value={c.id}>{c.name}</option>
+                  ))
+                )}
+                <option value={""}>
+                  <Text id="new_company" />
                 </option>
-              ) : (
-                data.companies.map((c) => (
-                  <option value={c.id}>{c.name}</option>
-                ))
-              )}
-              <option value={""}>
-                <Text id="new_company"/>
-              </option>
-            </HTMLSelect>
-          </Navbar.Group>
-        </Navbar>
+              </select>
+            </section>
+            <section class="navbar-section" />
+          </header>
+        </div>
         {!data ? (
-          <div bp="margin flex">
-            <div bp="fit">
-              <Card>
-                <Spinner/>
-              </Card>
+          <div class="container">
+            <div class="card">
+              <div class="loading loading-lg"/>
             </div>
           </div>
         ) : (
-          <Company query={{ variables: { id: selectedCompany } }} addCompany={addCompany}/>
+          <Company
+            query={{ variables: { id: selectedCompany } }}
+            addCompany={addCompany}
+          />
         )}
       </div>
     );
   }
 }
 
-export const Config = connect(ConfigView, {
-  query: query(companies),
-  mutation: {
-    addCompany: mutation(addCompany)
-  },
-  refetch: true
-});
+export const Config = connect(
+  ConfigView,
+  {
+    query: query(companies),
+    mutation: {
+      addCompany: mutation(addCompany)
+    },
+    refetch: true
+  }
+);

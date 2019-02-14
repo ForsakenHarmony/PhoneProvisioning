@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import { PrimaryGeneratedColumn, Column, Entity, OneToMany, ManyToOne } from "typeorm";
 import { Matches, MaxLength } from 'class-validator';
 
@@ -8,11 +8,19 @@ import { TopSoftkey } from "./top-softkey";
 import { Softkey } from "./softkey";
 
 @ObjectType()
-@Entity()
+@Entity({
+  orderBy: {
+    idx: "ASC"
+  }
+})
 export class Phone {
   @Field(type => ID)
   @PrimaryGeneratedColumn("uuid")
   readonly id!: string;
+
+  @Field(type => Int)
+  @Column()
+  idx!: number;
 
   @Field()
   @Column()
@@ -20,24 +28,24 @@ export class Phone {
 
   @Field()
   @Column()
-  number!: number;
+  number!: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  @Matches(/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)
-  ip?: string;
+  @Matches(/^(?:[0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}$/)
+  mac?: string;
 
   @Field(type => Company)
-  @ManyToOne(type => Company, { lazy: true })
+  @ManyToOne(type => Company, { lazy: true, onDelete: "CASCADE" })
   company!: Lazy<Company>;
 
   @MaxLength(18)
   @Field(type => [Softkey])
-  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: true, onDelete: "CASCADE" })
-  softkeys!: Lazy<[Softkey]>;
+  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: true })
+  softkeys!: Lazy<Softkey[]>;
 
   @MaxLength(20)
   @Field(type => [TopSoftkey])
-  @OneToMany(type => TopSoftkey, key => key.phone, { lazy: true, cascade: true, onDelete: "CASCADE" })
-  topSoftkeys!: Lazy<[TopSoftkey]>;
+  @OneToMany(type => TopSoftkey, key => key.phone, { lazy: true, cascade: true })
+  topSoftkeys!: Lazy<TopSoftkey[]>;
 }

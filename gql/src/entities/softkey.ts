@@ -48,6 +48,6 @@ export class Softkey {
   busy!: boolean;
 
   @Field(type => Phone)
-  @ManyToOne(type => Phone, { lazy: true })
+  @ManyToOne(type => Phone, { lazy: true, onDelete: "CASCADE" })
   phone!: Lazy<Phone>;
 }

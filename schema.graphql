@@ -18,22 +18,32 @@ scalar DateTime
 
 type Mutation {
   addCompany(company: CompanyInput!): Company!
+  removeCompany(companyId: ID!): Company!
+  transferConfigToPhones(companyId: ID!): Boolean!
+  exportCompany(companyId: ID!): RawCompany!
+  importCompany(company: RawCompanyInput!): Company!
   setActiveCompany(companyId: ID!): Boolean!
   addPhone(phone: PhoneInput!, companyId: ID!): Phone!
-  updatePhone(phone: PhoneInput!, phoneId: ID!): Phone!
-  removePhone(phoneId: ID!): Phone!
+  movePhones(to: ID!, from: ID!): [Phone!]!
+  updatePhone(phone: PhoneInput!, id: ID!): Phone!
+  removePhone(id: ID!): Phone!
   addTopSoftkey(softkey: TopSoftkeyInput!, phoneId: ID!): TopSoftkey!
-  updateTopSoftkey(softkey: TopSoftkeyInput!, softkeyId: ID!): TopSoftkey!
-  removeTopSoftkey(softkey: TopSoftkeyInput!, softkeyId: ID!): TopSoftkey!
+  updateTopSoftkey(softkey: TopSoftkeyInput!, id: ID!): TopSoftkey!
+  removeTopSoftkey(id: ID!): TopSoftkey!
   addSoftkey(softkey: SoftkeyInput!, phoneId: ID!): Softkey!
+  updateSoftkey(softkey: SoftkeyInput!, id: ID!): Softkey!
+  removeSoftkey(id: ID!): Softkey!
+  copyToAll(phoneId: ID!): Company!
   resetPhone(phoneId: ID!): Boolean!
+  transferConfigToPhone(phoneId: ID!): Boolean!
 }
 
 type Phone {
   id: ID!
+  idx: Int!
   name: String!
-  number: Float!
-  ip: String
+  number: String!
+  mac: String
   company: Company!
   softkeys: [Softkey!]!
   topSoftkeys: [TopSoftkey!]!
@@ -42,13 +52,14 @@ type Phone {
 
 input PhoneInput {
   name: String!
-  number: Float!
-  ip: String
+  number: String!
+  mac: String
 }
 
 type PhoneNotification {
   phone: Phone!
   date: DateTime!
+  status: String!
 }
 
 enum PhoneStatus {
@@ -62,6 +73,72 @@ type Query {
   companies: [Company!]!
   company(companyId: ID!): Company
   checkPostList(phoneId: ID!): Boolean!
+}
+
+type RawCompany {
+  name: String!
+  phones: [RawPhone!]!
+}
+
+input RawCompanyInput {
+  name: String!
+  phones: [RawPhoneInput!]!
+}
+
+type RawPhone {
+  idx: Float!
+  name: String!
+  number: String!
+  mac: String
+  softkeys: [RawSoftkey!]!
+  topSoftkeys: [RawTopSoftkey!]!
+}
+
+input RawPhoneInput {
+  idx: Float!
+  name: String!
+  number: String!
+  mac: String
+  softkeys: [RawSoftkeyInput!]!
+  topSoftkeys: [RawTopSoftkeyInput!]!
+}
+
+type RawSoftkey {
+  type: SoftkeyTypes!
+  label: String
+  value: String
+  line: Float
+  idle: Boolean
+  connected: Boolean
+  incoming: Boolean
+  outgoing: Boolean
+  busy: Boolean
+}
+
+input RawSoftkeyInput {
+  type: SoftkeyTypes!
+  label: String
+  value: String
+  line: Float
+  idle: Boolean
+  connected: Boolean
+  incoming: Boolean
+  outgoing: Boolean
+  busy: Boolean
+}
+
+type RawTopSoftkey {
+  type: TopSoftkeyTypes!
+  label: String
+  value: String
+  line: Float
+}
+
+input RawTopSoftkeyInput {
+  type: TopSoftkeyTypes!
+  label: String
+  value: String
+  line: Float
 }
 
 type Softkey {

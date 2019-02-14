@@ -1,78 +1,95 @@
 import { query, subscription, withSubscription } from "@pql/preact";
 import { company, phoneStatus } from "../gql/index.gql";
-import {
-  Button,
-  Card,
-  Divider,
-  FormGroup,
-  H5,
-  InputGroup,
-  NonIdealState,
-  Spinner
-} from "@blueprintjs/core";
 import { Localizer, Text } from "preact-i18n";
 import lst from "linkstate";
 import { PhoneConfig } from "./phone-config-view";
 import { CompanyPhones } from "./company-phones";
 import { Component } from "preact";
+import { Phone } from "preact-feather";
+import clsx from "clsx";
 
 class CompanyView extends Component {
   state = {
-    newName: ""
+    newName: "",
+    loading: false
   };
 
-  render({ loaded, data, error }, { newName }, {}) {
+  createNew = e => {
+    e.preventDefault();
+    this.setState({ loading: true });
+    this.props
+      .addCompany(this.state.newName)
+      .catch(e => {})
+      .then(() => {
+        this.setState({ loading: false });
+      });
+  };
+
+  render({ loaded, data, error }, { newName, loading }, {}) {
     return (
-      <div bp="margin flex">
-        <div bp="fit">
+      <div class="container">
+        <div>
           {!loaded ? (
             <div class="card">
-              <div class="loading loading-lg"/>
+              <div class="card-body">
+                <div class="loading loading-lg" />
+              </div>
             </div>
           ) : !data || !data.company ? (
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title h5">
-                  <Text id="new_company" />
+            <form onSubmit={this.createNew}>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title h5">
+                    <Text id="new_company" />
+                  </div>
                 </div>
-              </div>
-              <div class="card-body">
-                <Localizer>
-                  <FormGroup label={<Text id="name" />}>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label class="form-label" for="newName">
+                      <Text id="name" />
+                    </label>
                     <Localizer>
-                      <InputGroup
+                      <input
+                        required
+                        class="form-input"
+                        type="text"
+                        id="newName"
+                        placeholder={<Text id="name" />}
                         value={newName}
                         onChange={lst(this, "newName")}
-                        placeholder={<Text id="name" />}
                       />
                     </Localizer>
-                  </FormGroup>
-                </Localizer>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button
+                    class={clsx("btn btn-primary", { "loading": loading })}
+                  >
+                    <Text id="create_company" />
+                  </button>
+                </div>
               </div>
-              <div class="card-footer">
-                <button class="btn btn-primary" onClick={this.createNew}>
-                  <Text id="create_company" />
-                </button>
-              </div>
-            </div>
+            </form>
           ) : (
             <CompanyPhones company={data.company} />
           )}
         </div>
-        <div
-          bp="fill margin-left flex"
-          style="overflow-x: auto; flex-wrap: nowrap"
-        >
+        <div class="phones">
           {data && data.company ? (
             data.company.phones.map((p, id) => (
-              <div bp="margin 6">
+              <div bp="margin-left margin-right 6">
                 <PhoneConfig phone={p} id={id} company={data.company} />
               </div>
             ))
           ) : (
-            <Localizer>
-              <NonIdealState icon="phone" title={<Text id="no_phones" />} />
-            </Localizer>
+            <div class="empty non-ideal">
+              <div class="empty-icon">
+                <Phone size={48} />
+              </div>
+              <p class="empty-title h5">
+                <Text id="no_phones" />
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -81,12 +98,14 @@ class CompanyView extends Component {
 }
 
 export const Company = withSubscription(CompanyView, {
-  query: query(company),
+  query: query(company, ({ id }) => ({ id })),
   subscription: subscription(phoneStatus),
   processUpdate: (data, next) => {
-    console.log(data, next);
-    if (!data || next.company) return next;
-    data.company.phones[next.phone.id] = next.phone;
+    console.log('sub', data, next);
+    if (next.company)
+      return next;
+
+    // data.company.phones[next.phoneStatus.phone.id] = next.phoneStatus.phone;
     return data;
   }
 });

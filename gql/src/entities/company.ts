@@ -16,5 +16,5 @@ export class Company {
 
   @Field(type => [Phone])
   @OneToMany(type => Phone, phone => phone.company, { lazy: true, cascade: true })
-  phones!: Lazy<[Phone]>
+  phones!: Lazy<Phone[]>
 }

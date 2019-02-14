@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
+import { Field, ObjectType, registerEnumType } from "type-graphql";
 import { Phone } from "../../entities/phone";
 
 @ObjectType()
@@ -8,6 +8,9 @@ export class PhoneNotification {
 
   @Field(type => Date)
   date!: Date;
+
+  @Field()
+  status!: PhoneStatus;
 }
 
 export enum PhoneStatus {
@@ -23,5 +26,6 @@ registerEnumType(PhoneStatus, {
 
 export interface PhoneNotificationPayload {
   id: string;
+  status: PhoneStatus;
 }
 

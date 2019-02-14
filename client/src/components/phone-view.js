@@ -1,4 +1,3 @@
-import { Button, InputGroup, Intent } from "@blueprintjs/core";
 import { Localizer, Text } from "preact-i18n";
 import clsx from "clsx";
 
@@ -16,7 +15,12 @@ export const PhoneView = ({
   <tr key={id} id={`phone.${id}`} {...props} style={over ? "opacity: .5" : ""}>
     <td>{!last && handle}</td>
     <td>
-      <InputGroup
+      <input
+        class="form-input"
+        type="text"
+        required
+        pattern="[\w ]{2,}"
+        form={id}
         value={phone.name}
         onChange={update.bind(null, "name")}
         id={`phone.name.${id}`}
@@ -25,7 +29,13 @@ export const PhoneView = ({
       />
     </td>
     <td>
-      <InputGroup
+      <input
+        class="form-input"
+        type="number"
+        required
+        pattern="\d+"
+        aria-invalid="true"
+        form={id}
         value={phone.number}
         onChange={update.bind(null, "number")}
         id={`phone.number.${id}`}
@@ -34,18 +44,23 @@ export const PhoneView = ({
       />
     </td>
     <td>
-      <InputGroup
-        value={phone.ip}
-        onChange={update.bind(null, "ip")}
-        id={`phone.ip.${id}`}
+      <input
+        class="form-input"
+        type="text"
+        pattern="(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}"
+        form={id}
+        value={phone.mac}
+        onChange={update.bind(null, "mac")}
+        id={`phone.mac.${id}`}
         onFocus={focus}
-        placeholder="192.168.X.X"
+        placeholder="ff:ff:ff:ff:ff:ff"
       />
     </td>
     <td>
       {(({ icon, tooltip, intent, ...props }) => (
         <Localizer>
           <button
+            type="button"
             class={clsx({
               "btn btn-action tooltip": true,
               [`btn-${intent}`]: true
@@ -67,7 +82,11 @@ export const PhoneView = ({
     </td>
     <td>
       {!last && (
-        <button class="btn btn-action" onClick={remove.bind(null, id)}>
+        <button
+          class="btn btn-action"
+          type="button"
+          onClick={remove.bind(null, id)}
+        >
           <i class="icon icon-delete" />
         </button>
       )}

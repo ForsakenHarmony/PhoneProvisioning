@@ -1,13 +1,11 @@
-import { Recipe } from "./recipe-type";
+export type Lazy<T extends object> = Promise<T> | T;
 
-export function generateRecipes(count: number): Recipe[] {
-  return new Array(count).fill(null).map(
-    (_, i): Recipe => ({
-      title: `Recipe #${i + 1}`,
-      description: `Description #${i + 1}`,
-      creationDate: new Date(),
-    }),
-  );
+export function logFn(context: string, message: string) {
+  process.stdout.write(`[${context}] ${message}\n`);
 }
 
-export type Lazy<T extends object> = Promise<T> | T;
+export function delay(ms: number) {
+  return new Promise(res => {
+    setTimeout(res, ms);
+  })
+}

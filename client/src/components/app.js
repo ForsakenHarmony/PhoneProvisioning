@@ -4,19 +4,21 @@ import { definition } from "../constants";
 
 import { Client } from "@pql/client";
 import { SocketTransport } from "@pql/websocket";
-import { Provider } from "@pql/preact";
+import { Provider } from "@pql/hooks";
+import { cache, DefaultStorage } from "@pql/cache";
 
 const transport = new SocketTransport({
-  url: "ws://localhost:4000/graphql" // `ws://${window.location.host}/api/graphql`,
+  // "ws://localhost:4000/graphql"
+  url: `ws://${window.location.host}/api/graphql`
 });
 
-const client = new Client(transport);
+const client = new Client(transport, [cache(new DefaultStorage())]);
 
 export class App {
   render() {
     return (
       <IntlProvider definition={definition}>
-        <Provider client={client}>
+        <Provider value={client}>
           <Config />
         </Provider>
       </IntlProvider>

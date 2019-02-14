@@ -4,30 +4,33 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "preact build --dest ../server/public --no-sw",
+    "build": "preact build --dest ../gql/dist/public --no-sw --no-prerender",
     "dev": "preact watch",
     "prettier": "prettier src/**/*.{js,css,json} --write"
   },
   "devDependencies": {
-    "preact-cli": "^3.0.0-next.14",
+    "preact-cli": "^3.0.0-next.16",
     "prettier": "^1.15.3"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.10.0",
-    "@pql/client": "^0.2.0-alpha.1",
-    "@pql/preact": "^0.2.0-alpha.1",
-    "@pql/websocket": "^0.2.0-alpha.1",
+    "@blueprintjs/core": "^3.11.0",
+    "@pql/cache": "^0.2.0-alpha.3",
+    "@pql/client": "^0.2.0-alpha.3",
+    "@pql/hooks": "../../pql/@pql/hooks",
+    "@pql/preact": "^0.2.0-alpha.3",
+    "@pql/websocket": "^0.2.0-alpha.3",
+    "babel-plugin-macros": "^2.5.0",
     "blueprint-css": "^3.1.0",
+    "preact": "*",
+    "clsx": "^1.0.1",
     "flexboxgrid": "^6.3.1",
     "linkstate": "^1.1.1",
-    "mobx": "^5.8.0",
-    "mobx-react": "^5.4.3",
     "normalize.css": "^8.0.1",
-    "preact": "^8.4.2",
     "preact-compat": "^3.17.0",
+    "preact-feather": "^3.2.0",
     "preact-i18n": "^1.2.2",
     "preact-router": "^2.5.7",
     "spectre.css": "^0.5.8",
-    "clsx": "^1.0.0"
+    "graphql": "latest"
   }
 }

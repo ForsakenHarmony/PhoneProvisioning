@@ -28,6 +28,6 @@ export class TopSoftkey {
   line!: number;
 
   @Field(type => Phone)
-  @ManyToOne(type => Phone, { lazy: true })
+  @ManyToOne(type => Phone, { lazy: true, onDelete: "CASCADE" })
   phone!: Lazy<Phone>;
 }

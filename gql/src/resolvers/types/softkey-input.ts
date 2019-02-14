@@ -1,7 +1,6 @@
 import { Field, InputType } from "type-graphql";
-import { TopSoftkey } from "../../entities/top-softkey";
-import { SoftkeyTypes, TopSoftkeyTypes } from "../../constants";
-import { Column, DeepPartial } from "typeorm";
+import { SoftkeyTypes } from "../../constants";
+import { DeepPartial } from "typeorm";
 import { Softkey } from "../../entities/softkey";
 
 @InputType()

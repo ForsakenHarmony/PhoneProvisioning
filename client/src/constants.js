@@ -1,6 +1,5 @@
-import { Intent } from "@blueprintjs/core";
-
 export const definition = {
+  error: "Error",
   leave_free: "Tastenfelder frei lassen",
   phones: "Telefone",
   phone_provisioning: "Telefon Config",
@@ -10,17 +9,24 @@ export const definition = {
   new_company: "Neuer Kunde",
   name: "Name",
   number: "Nummer",
-  ip: "IP",
+  mac: "Mac Adresse",
   label: "Beschrift.",
   value: "Wert",
   copy: "Kopieren",
-  save: "Konfig übertragen",
+  copy_to_all: "Zu allen kopieren",
+  save: "Speichern",
   no_phones: "Keine Telefone",
   create_company: "Erstellen",
   status: "Status",
-  nonexistent: "Existiert nicht (keine IP?)",
+  nonexistent: "Existiert nicht (keine Mac Adresse?)",
   online: "Online",
   offline: "Nicht erreichbar",
+  add_softkey: "Softkey hinzufügen",
+  top_softkeys: "Top Softkeys",
+  softkeys: "Softkeys",
+  edit_softkey: "Softkey bearbeiten",
+  export: "Konfig exportieren",
+  import: "Konfig importieren",
   softkey: {
     "": "Kein",
     line: "Leitung",
@@ -53,46 +59,12 @@ export const definition = {
     hotdesklogin: "Log-In",
     speeddialmwi: "Direktwahl/MWI",
     discreetringing: "Discreet Ringing",
+    callhistory: "Call History",
     empty: "Leer"
   }
 };
 
-export const softkeyTypes = [
-  "",
-  "line",
-  "speeddial",
-  "dnd",
-  "blfprivacy",
-  "blf",
-  "list",
-  "acd",
-  "dcp",
-  "xml",
-  "flash",
-  "spre",
-  "park",
-  "pickup",
-  "lcr",
-  "callforward",
-  "blfxfer",
-  "speeddialxfer",
-  "speeddialconf",
-  "directory",
-  "filter",
-  "callers",
-  "redial",
-  "conf",
-  "xfer",
-  "icom",
-  "phonelock",
-  "paging",
-  "hotdesklogin",
-  "speeddialmwi",
-  "discreetringing",
-  "empty"
-];
-
-export const TopSoftkeyTypes = {
+export const EnumToTopSoftkey = {
   None: "",
   Line: "line",
   SpeedDial: "speeddial",
@@ -127,13 +99,13 @@ export const TopSoftkeyTypes = {
   Empty: "empty"
 };
 
-export function toTopSoftkeyEnum(val) {
-  return Object.keys(TopSoftkeyTypes)[
-    Object.values(TopSoftkeyTypes).indexOf(val)
-  ];
-}
+export const topSoftkeyTypes = Object.values(EnumToTopSoftkey);
+export const TopSoftkeyToEnum = Object.keys(EnumToTopSoftkey).reduce(
+  (acc, val) => Object.assign(acc, { [EnumToTopSoftkey[val]]: val }),
+  {}
+);
 
-export const SoftkeyTypes = {
+export const EnumToSoftkey = {
   None: "",
   SpeedDial: "speeddial",
   DoNotDisturb: "dnd",
@@ -160,3 +132,9 @@ export const SoftkeyTypes = {
   History: "callhistory",
   Empty: "empty"
 };
+
+export const softkeyTypes = Object.values(EnumToSoftkey);
+export const SoftkeyToEnum = Object.keys(EnumToSoftkey).reduce(
+  (acc, val) => Object.assign(acc, { [EnumToSoftkey[val]]: val }),
+  {}
+);

@@ -7,9 +7,9 @@ export class PhoneInput implements Partial<Phone> {
   name!: string;
 
   @Field()
-  number!: number;
+  number!: string;
 
   @Field({ nullable: true })
-  ip?: string;
+  mac?: string;
 }
 

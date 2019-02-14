@@ -1,5 +1,16 @@
 import "./style/index.css";
-import "blueprint-css/dist/blueprint.css";
-import { App } from "./components/app";
+import { h, render } from 'preact';
+import 'preact/debug';
 
-export default App;
+const elem = document.createElement('main');
+document.body.prepend(elem);
+
+const init = () => {
+  const { App } = require("./components/app");
+  render(h(App, {}), elem);
+};
+
+if (module.hot) module.hot.accept(".", init);
+
+init();
+

@@ -1,10 +1,11 @@
-import { Card, HTMLSelect, Navbar, Spinner } from "@blueprintjs/core";
-import { Text } from "preact-i18n";
+import { Localizer, Text } from "preact-i18n";
 import { Component } from "preact";
 import { connect, mutation, query } from "@pql/preact";
+import lst from "linkstate";
 
-import { addCompany, companies } from "../gql/index.gql";
+import { addCompany, companies, exportCompany, importCompany, removeCompany, setActiveCompany } from "../gql/index.gql";
 import { Company } from "./company";
+import { Download, Trash, Upload } from "preact-feather";
 
 class ConfigView extends Component {
   state = {
@@ -22,11 +23,86 @@ class ConfigView extends Component {
     });
   };
 
-  render(
-    { loaded, data, error, addCompany },
-    { selectedCompany, newName },
-    {}
-  ) {
+  componentDidUpdate = (_, prevState) => {
+    if (
+      this.props.loaded &&
+      this.props.data &&
+      this.state.selectedCompany === ""
+    ) {
+      this.setState({
+        selectedCompany: (this.props.data.companies[0] || {}).id || "new"
+      });
+    }
+    if (
+      prevState.selectedCompany !== this.state.selectedCompany &&
+      this.state.selectedCompany !== "new" &&
+      this.state.selectedCompany !== ""
+    ) {
+      this.props.setActive({
+        variables: {
+          id: this.state.selectedCompany
+        }
+      });
+    }
+  };
+
+  exportCompany = async () => {
+    if (this.state.selectedCompany === "new" ||
+    this.state.selectedCompany === "" ) {
+      return;
+    }
+    const { data } = await this.props.exportCompany({
+      variables: {
+        companyId: this.state.selectedCompany
+      }
+    });
+    const a = document.createElement("a");
+    a.setAttribute("href", `data:application/json;charset=utf-8;base64,${btoa(JSON.stringify(data.exportCompany, void 0, 2))}`);
+    a.setAttribute("download", `export-phone.json`);
+    a.click();
+  };
+
+  importCompany = () => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.click();
+    input.onchange = async () => {
+      console.log(input.files);
+      try {
+        const file = input.files[0];
+        const text = await new Response(file).text();
+        const company = JSON.parse(text);
+        const { data } = await this.props.importCompany({
+          variables: {
+            company: company
+          }
+        });
+        this.setState({
+          selectedCompany: data.importCompany.id
+        });
+      } catch (e) {
+        alert(`Couldn't parse file \n${e.message}`)
+      }
+    };
+  };
+
+  removeCompany = () => {
+    if (this.state.selectedCompany === "new" ||
+      this.state.selectedCompany === "" ) {
+      return;
+    }
+    this.props.removeCompany({
+      variables: {
+        companyId: this.state.selectedCompany
+      }
+    }).then(() => {
+      this.setState({
+        selectedCompany: (this.props.data.companies[0] || {}).id || "new"
+      });
+    })
+  };
+
+  render({ loaded, data, error }, { selectedCompany, newName }, {}) {
     return (
       <div id="app">
         <div class="column">
@@ -40,9 +116,7 @@ class ConfigView extends Component {
               <select
                 class="form-select"
                 value={selectedCompany}
-                onChange={e =>
-                  this.setState({ selectedCompany: e.target.value })
-                }
+                onChange={lst(this, "selectedCompany")}
               >
                 {!data ? (
                   <option>
@@ -53,24 +127,59 @@ class ConfigView extends Component {
                     <option value={c.id}>{c.name}</option>
                   ))
                 )}
-                <option value={""}>
+                <option value={"new"}>
                   <Text id="new_company" />
                 </option>
               </select>
+              <Localizer>
+                <button
+                  class="btn btn-primary btn-action tooltip tooltip-bottom"
+                  data-tooltip={<Text id="export"/>}
+                  onClick={this.exportCompany}>
+                  <Download/>
+                </button>
+              </Localizer>
+              <Localizer>
+                <button
+                  class="btn btn-primary btn-action tooltip tooltip-bottom"
+                  data-tooltip={<Text id="import"/>}
+                  onClick={this.importCompany}>
+                  <Upload/>
+                </button>
+              </Localizer>
+              <Localizer>
+                <button
+                  class="btn btn-primary btn-action tooltip tooltip-bottom"
+                  data-tooltip={<Text id="delete"/>}
+                  onClick={this.removeCompany}>
+                  <Trash/>
+                </button>
+              </Localizer>
             </section>
-            <section class="navbar-section" />
+            <section class="navbar-section"/>
           </header>
         </div>
-        {!data ? (
+        {!loaded ? (
           <div class="container">
             <div class="card">
-              <div class="loading loading-lg"/>
+              <div class="card-body">
+                <div class="loading loading-lg" />
+              </div>
+            </div>
+          </div>
+        ) : error ? (
+          <div class="container">
+            <div class="card">
+              <div class="card-body">
+                <Text id="error" />
+                <p>{JSON.stringify(error)}</p>
+              </div>
             </div>
           </div>
         ) : (
           <Company
-            query={{ variables: { id: selectedCompany } }}
-            addCompany={addCompany}
+            id={selectedCompany}
+            addCompany={this.createNew}
           />
         )}
       </div>
@@ -83,7 +192,11 @@ export const Config = connect(
   {
     query: query(companies),
     mutation: {
-      addCompany: mutation(addCompany)
+      addCompany: mutation(addCompany),
+      setActive: mutation(setActiveCompany),
+      exportCompany: mutation(exportCompany),
+      importCompany: mutation(importCompany),
+      removeCompany: mutation(removeCompany),
     },
     refetch: true
   }

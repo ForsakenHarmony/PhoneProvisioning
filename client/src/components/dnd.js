@@ -64,12 +64,14 @@ export class DnD extends Component {
 
     newItems.splice(target, 0, newItems.splice(dragged, 1)[0]);
 
-    this.props.onSwap(dragged, target);
+    const items = this.props.items;
+    const prop = this.props.prop;
+    this.props.onMove(items[dragged][prop], items[target][prop]);
     this.props.onSort(newItems);
   }
 
   render(
-    { container: Container, item: Item, items, handle: Handle, prop, onSort },
+    { container: Container, item: Item, items, handle: Handle, prop, onMove },
     { dragged, dragging, over, draggable },
     {}
   ) {
@@ -112,6 +114,6 @@ DnD.defaultProps = {
   container: ({ children, ...props }) => <ul {...props}>{children}</ul>,
   item: ({ data }) => <li>{JSON.stringify(data)}</li>,
   onSort: () => {},
-  onSwap: (from, to) => {},
+  onMove: (from, to) => {},
   prop: "id"
 };

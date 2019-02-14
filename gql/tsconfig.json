@@ -1,17 +1,24 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
+    "moduleResolution": "node",
+
+    "newLine": "lf",
     "target": "esnext",
     "module": "commonjs",
-    "lib": [
-      "es2016",
-      "esnext",
-      "esnext.asynciterable",
-      "es2017.object"
-    ],
-    "moduleResolution": "node",
-    "newLine": "lf",
+    "sourceMap": false,
     "outDir": "dist",
+    "declaration": false,
+
+    "jsx": "react",
+    "jsxFactory": "h",
+
+    "lib": ["es6", "dom", "esnext"],
+
+    "experimentalDecorators": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
     "strict": true,
     "allowUnreachableCode": false,
     "noImplicitAny": true,
@@ -19,13 +26,12 @@
     "noImplicitThis": true,
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "sourceMap": true
+
+    "baseUrl": ".",
+    "paths": { "*": ["typings/*"] }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
+  "include": ["src/**/*.ts", "typings/**/*.d.ts"],
+  "files": [
+    "src/index.ts"
   ]
 }

@@ -1,43 +1,69 @@
 import "reflect-metadata";
+import "sqlite3";
 import { Container } from "typedi";
 import { createConnection, useContainer as ormUseContainer } from "typeorm";
 import { SqliteConnectionOptions } from "typeorm/driver/sqlite/SqliteConnectionOptions";
 import { buildSchema, formatArgumentValidationError, useContainer as gqlUseContainer } from "type-graphql";
-import express from 'express';
+import { ApolloServer } from "apollo-server-express";
+import { PubSub } from "graphql-subscriptions";
+import express from "express";
+import net from "net";
+import opn from 'opn';
 
-import { ApolloServer } from "./server";
-
+import { ArpHelper } from "./api/networking/arp-helpers";
+import { Company } from "./entities/company";
+import { Phone } from "./entities/phone";
+import { Softkey } from "./entities/softkey";
+import { TopSoftkey } from "./entities/top-softkey";
+import { Initial1547829364100 } from "./migration/1547829364100-Initial";
 import { CompanyResolver } from "./resolvers/companyResolver";
 import { PhoneResolver } from "./resolvers/phoneResolver";
-
-import baseConfig from '../ormconfig.json';
-import net from "net";
 
 // register 3rd party IOC container
 gqlUseContainer(Container);
 ormUseContainer(Container);
 
 void (async function bootstrap() {
-  process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-  const isProd = process.env.NODE_ENV === 'production';
+  process.env.NODE_ENV = process.env.NODE_ENV || "production";
+  const isProd = process.env.NODE_ENV === "production";
+
+  Container.get(ArpHelper);
 
   const ormConfig: SqliteConnectionOptions = {
-    ...baseConfig,
     type: "sqlite",
+    database: "database.sqlite",
     logger: "advanced-console",
-    logging: "all",
-    synchronize: !isProd
+    logging: ["error", "warn", "migration"],
+    synchronize: !isProd,
+    entities: [
+      Company,
+      Phone,
+      Softkey,
+      TopSoftkey
+    ],
+    migrations: [
+      Initial1547829364100
+    ],
+    migrationsRun: isProd
+    // dropSchema: true,
   };
 
   await createConnection(ormConfig);
 
+  const pubSub = new PubSub();
+  Container.set({ id: "PB", value: pubSub });
+
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
     resolvers: [CompanyResolver, PhoneResolver],
-    emitSchemaFile: "../schema.graphql"
+    emitSchemaFile: !isProd && "../schema.graphql",
+    pubSub
   });
 
   const app = express();
+
+  const path = require('path');
+  app.use('/', express.static(path.join(__dirname, "./public")));
 
   // Create GraphQL server
   const server = new ApolloServer({
@@ -46,12 +72,14 @@ void (async function bootstrap() {
     // otherwise validation errors won't be returned to a client
     formatError: formatArgumentValidationError,
     introspection: true,
-    playground: true,
+    playground: !isProd,
     uploads: false,
     debug: true,
     tracing: true,
-
+    subscriptions: '/api/graphql'
   });
+
+  server.applyMiddleware({ app, path: '/api/graphql' });
 
   const http = app.listen(4000, () => {
     server.installSubscriptionHandlers(http);
@@ -59,7 +87,7 @@ void (async function bootstrap() {
     const serverInfo: any = {
       ...(http.address() as net.AddressInfo),
       server: http,
-      subscriptionsPath: server.subscriptionsPath,
+      subscriptionsPath: server.subscriptionsPath
     };
 
     // Convert IPs which mean "any address" (IPv4 or IPv6) into localhost
@@ -69,24 +97,25 @@ void (async function bootstrap() {
     // `frontends.host` field in your engine config, or in the `host`
     // option to ApolloServer.listen).
     let hostForUrl = serverInfo.address;
-    if (serverInfo.address === '' || serverInfo.address === '::')
-      hostForUrl = 'localhost';
+    if (serverInfo.address === "" || serverInfo.address === "::")
+      hostForUrl = "localhost";
 
-    serverInfo.url = require('url').format({
-      protocol: 'http',
+    serverInfo.url = require("url").format({
+      protocol: "http",
       hostname: hostForUrl,
       port: serverInfo.port,
-      pathname: server.graphqlPath,
+      pathname: server.graphqlPath
     });
 
-    serverInfo.subscriptionsUrl = require('url').format({
-      protocol: 'ws',
+    serverInfo.subscriptionsUrl = require("url").format({
+      protocol: "ws",
       hostname: hostForUrl,
       port: serverInfo.port,
       slashes: true,
-      pathname: server.subscriptionsPath,
+      pathname: server.subscriptionsPath
     });
 
-    console.log(`Server is running, GraphQL Playground available at ${serverInfo.url}`);
+    console.log(`Server is running, GraphQL Playground available at ${serverInfo.url}, Subscriptions at ${serverInfo.subscriptionsUrl}`);
+    isProd && opn('http://localhost:4000')
   });
 })().catch(console.error);

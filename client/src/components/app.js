@@ -1,20 +1,13 @@
-import { IntlProvider } from "preact-i18n";
+import { IntlProvider } from "./i18n";
+import { Component } from "preact";
 import { Config } from "./config";
 import { definition } from "../constants";
 
-import { Client } from "@pql/client";
-import { SocketTransport } from "@pql/websocket";
-import { Provider } from "@pql/hooks";
-import { cache, DefaultStorage } from "@pql/cache";
+import { createClient, Provider } from "@pql/boost";
 
-const transport = new SocketTransport({
-  // "ws://localhost:4000/graphql"
-  url: `ws://${window.location.host}/api/graphql`
-});
+const client = createClient(`ws://${window.location.host}/api/graphql`);
 
-const client = new Client(transport, [cache(new DefaultStorage())]);
-
-export class App {
+export class App extends Component {
   render() {
     return (
       <IntlProvider definition={definition}>

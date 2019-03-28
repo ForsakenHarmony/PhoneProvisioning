@@ -35,6 +35,10 @@ export class Phone {
   @Matches(/^(?:[0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}$/)
   mac?: string;
 
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  skipContacts!: boolean;
+
   @Field(type => Company)
   @ManyToOne(type => Company, { lazy: true, onDelete: "CASCADE" })
   company!: Lazy<Company>;

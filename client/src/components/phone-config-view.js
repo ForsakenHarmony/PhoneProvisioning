@@ -1,17 +1,17 @@
-import { Localizer, Text } from "preact-i18n";
-import { Copy, Plus, Save } from "preact-feather";
+import { Localizer, Text } from "./i18n";
+import { Copy, Plus, Save, Download, UserX, UserCheck } from "preact-feather";
 import clsx from "clsx";
-import { Component } from "preact";
-import { connect, mutation } from "@pql/preact";
 import {
-  addSoftkey,
-  addTopSoftkey,
-  copyToAll,
-  removeSoftkey,
-  removeTopSoftkey,
-  transferConfig,
-  updateSoftkey,
-  updateTopSoftkey
+  addSoftkey as addSoftkeyMut,
+  addTopSoftkey as addTopSoftkeyMut,
+  copyToAll as copyToAllMut,
+  importFromPhone,
+  removeSoftkey as removeSoftkeyMut,
+  removeTopSoftkey as removeTopSoftkeyMut,
+  transferConfig as transferConfigMut,
+  updatePhone,
+  updateSoftkey as updateSoftkeyMut,
+  updateTopSoftkey as updateTopSoftkeyMut
 } from "../gql/index.gql";
 import {
   SoftkeyConfig,
@@ -19,264 +19,277 @@ import {
   TopSoftkeyPopover
 } from "./softkey-config";
 
-class PhoneConfigView extends Component {
-  state = {
-    activeView: "top_softkeys",
-    settingSoftkey: false,
-    copying: false,
-    transferring: false
-  };
+import { useMutation } from "@pql/boost";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
-  changeViewTo(view, e) {
-    e.preventDefault();
-    this.setState({
-      activeView: view
-    });
-  }
-
-  addTopSoftkey = softkey => {
-    this.setState({ settingSoftkey: true });
-    this.props
-      .addTopSoftkey({
-        variables: {
-          phoneId: this.props.phone.id,
-          softkey
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ settingSoftkey: false }));
-  };
-
-  removeTopSoftkey = id => {
-    this.setState({ settingSoftkey: true });
-    this.props
-      .removeTopSoftkey({
-        variables: {
-          id
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ settingSoftkey: false }));
-  };
-
-  updateTopSoftkey = (id, softkey) => {
-    this.setState({ settingSoftkey: true });
-    this.props
-      .updateTopSoftkey({
-        variables: {
-          id,
-          softkey
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ settingSoftkey: false }));
-  };
-
-  addSoftkey = softkey => {
-    this.setState({ settingSoftkey: true });
-    this.props
-      .addSoftkey({
-        variables: {
-          phoneId: this.props.phone.id,
-          softkey
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ settingSoftkey: false }));
-  };
-
-  removeSoftkey = id => {
-    this.setState({ settingSoftkey: true });
-    this.props
-      .removeSoftkey({
-        variables: {
-          id
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ settingSoftkey: false }));
-  };
-
-  updateSoftkey = (id, softkey) => {
-    this.setState({ settingSoftkey: true });
-    this.props
-      .updateSoftkey({
-        variables: {
-          id,
-          softkey
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ settingSoftkey: false }));
-  };
-
-  copyToAll = () => {
-    this.setState({ copying: true });
-    this.props
-      .copyToAll({
-        variables: {
-          phoneId: this.props.phone.id
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ copying: false }));
-  };
-
-  transferConfig = () => {
-    this.setState({ transferring: true });
-    this.props
-      .transferConfig({
-        variables: {
-          phoneId: this.props.phone.id
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError)
-      .then(() => this.setState({ transferring: false }));
-  };
-
-  clearError = () => {
-    this.setState({ error: null });
-  };
-
-  setError = error => {
-    this.setState({ error });
-  };
-
-  render({ phone }, { activeView, transferring, copying, settingSoftkey }, {}) {
-    return (
-      <div class="card card-softkey panel">
-        <div class="panel-header text-center">
-          <div class="panel-title h5 mt-10">{phone.name}</div>
-          <div class="panel-subtitle">{phone.number}</div>
-        </div>
-        <nav class="panel-nav">
-          <ul class="tab tab-block">
-            <li
-              class={clsx({
-                "tab-item": true,
-                active: activeView === "top_softkeys"
-              })}
-            >
-              <a
-                href="#!"
-                class="badge"
-                data-badge={phone.topSoftkeys.length}
-                onClick={this.changeViewTo.bind(this, "top_softkeys")}
-              >
-                <Text id="top_softkeys" />
-              </a>
-            </li>
-            <li
-              class={clsx({
-                "tab-item": true,
-                active: activeView === "softkeys"
-              })}
-            >
-              <a
-                href="#!"
-                class="badge"
-                data-badge={phone.softkeys.length}
-                onClick={this.changeViewTo.bind(this, "softkeys")}
-              >
-                <Text id="softkeys" />
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <div class="panel-body">
-          {activeView === "top_softkeys"
-            ? phone.topSoftkeys.map(softkey => (
-                <SoftkeyConfig
-                  softkey={softkey}
-                  set={this.updateTopSoftkey.bind(null, softkey.id)}
-                  remove={this.removeTopSoftkey}
-                  isTop={true}
-                  loading={settingSoftkey}
-                />
-              ))
-            : phone.softkeys.map(softkey => (
-                <SoftkeyConfig
-                  softkey={softkey}
-                  set={this.updateSoftkey.bind(null, softkey.id)}
-                  remove={this.removeSoftkey}
-                  loading={settingSoftkey}
-                />
-              ))}
-        </div>
-        <div class="panel-footer">
-          <div class="btn-group btn-group-block popover popover-with-trigger">
-            <Localizer>
-              <button
-                type="button"
-                class={clsx("btn btn-primary btn-action tooltip", {
-                  "loading": transferring
-                })}
-                data-tooltip={<Text id="transfer_config" />}
-                onClick={this.transferConfig}
-              >
-                <Save />
-              </button>
-            </Localizer>
-            <button
-              type="button"
-              class="btn btn-primary btn-action popover-trigger"
-            >
-              <Plus />
-            </button>
-            {activeView === "top_softkeys" ? (
-              <TopSoftkeyPopover
-                softkey={{ type: "None", id: "new" }}
-                isNew={true}
-                set={this.addTopSoftkey}
-                loading={settingSoftkey}
-              />
-            ) : (
-              <SoftkeyPopover
-                softkey={{ type: "None", id: "new" }}
-                isNew={true}
-                set={this.addSoftkey}
-                loading={settingSoftkey}
-              />
-            )}
-            <Localizer>
-              <button
-                type="button"
-                class={clsx("btn btn-primary btn-action tooltip", {
-                  "loading": copying
-                })}
-                data-tooltip={<Text id="copy_to_all" />}
-                onClick={this.copyToAll}
-              >
-                <Copy />
-              </button>
-            </Localizer>
-          </div>
-        </div>
-      </div>
-    );
-  }
+function useManagedMutation(
+  statusSetter,
+  errorSetter,
+  mutation,
+  variablesFn,
+  additional
+) {
+  return useCallback(
+    async (...args) => {
+      try {
+        statusSetter(true);
+        await mutation(variablesFn.apply(null, args));
+        errorSetter(null);
+      } catch (e) {
+        errorSetter(e);
+      } finally {
+        statusSetter(false);
+      }
+    },
+    [mutation, statusSetter, errorSetter, ...additional]
+  );
 }
 
-export const PhoneConfig = connect(
-  PhoneConfigView,
-  {
-    mutation: {
-      addTopSoftkey: mutation(addTopSoftkey),
-      updateTopSoftkey: mutation(updateTopSoftkey),
-      removeTopSoftkey: mutation(removeTopSoftkey),
-      addSoftkey: mutation(addSoftkey),
-      updateSoftkey: mutation(updateSoftkey),
-      removeSoftkey: mutation(removeSoftkey),
-      copyToAll: mutation(copyToAll),
-      transferConfig: mutation(transferConfig)
-    }
-  }
-);
+export function PhoneConfig({ phone }) {
+  const [activeView, changeView] = useState("top_softkeys");
+  const [settingSoftkey, setSettingSoftkey] = useState(false);
+  const [copying, setCopying] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [{}, addTopSoftkeyM] = useMutation(addTopSoftkeyMut);
+  const [{}, updateTopSoftkeyM] = useMutation(updateTopSoftkeyMut);
+  const [{}, removeTopSoftkeyM] = useMutation(removeTopSoftkeyMut);
+  const [{}, addSoftkeyM] = useMutation(addSoftkeyMut);
+  const [{}, updateSoftkeyM] = useMutation(updateSoftkeyMut);
+  const [{}, removeSoftkeyM] = useMutation(removeSoftkeyMut);
+  const [{}, copyToAllM] = useMutation(copyToAllMut);
+  const [{}, transferConfigM] = useMutation(transferConfigMut);
+  const [{}, importConfigM] = useMutation(importFromPhone);
+
+  const [{ fetching: updateFetching }, updatePhoneMut] = useMutation(
+    updatePhone
+  );
+
+  const updateSkip = useCallback(
+    skip => {
+      if (!phone) return;
+      updatePhoneMut({
+        id: phone.id,
+        phone: {
+          name: phone.name,
+          number: phone.number,
+          mac: phone.mac,
+          skipContacts: skip
+        }
+      })
+        .then(() => setError(null))
+        .catch(e => setError(e));
+    },
+    [updatePhoneMut, phone]
+  );
+
+  const importSoftkeys = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    importConfigM,
+    () => ({ id: phone.id }),
+    [phone.id]
+  );
+
+  const addTopSoftkey = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    addTopSoftkeyM,
+    softkey => ({ phoneId: phone.id, softkey }),
+    [phone.id]
+  );
+  const removeTopSoftkey = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    removeTopSoftkeyM,
+    id => ({ id }),
+    [phone.id]
+  );
+  const updateTopSoftkey = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    updateTopSoftkeyM,
+    (id, softkey) => ({ id, softkey }),
+    [phone.id]
+  );
+
+  const addSoftkey = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    addSoftkeyM,
+    softkey => ({ phoneId: phone.id, softkey }),
+    [phone.id]
+  );
+  const removeSoftkey = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    removeSoftkeyM,
+    id => ({ id }),
+    [phone.id]
+  );
+  const updateSoftkey = useManagedMutation(
+    setSettingSoftkey,
+    setError,
+    updateSoftkeyM,
+    (id, softkey) => ({ id, softkey }),
+    [phone.id]
+  );
+
+  const copyToAll = useManagedMutation(
+    setCopying,
+    setError,
+    copyToAllM,
+    () => ({ phoneId: phone.id }),
+    [phone.id]
+  );
+  const transferConfig = useManagedMutation(
+    setTransferring,
+    setError,
+    transferConfigM,
+    () => ({ phoneId: phone.id }),
+    [phone.id]
+  );
+
+  return (
+    <div class="card card-softkey panel">
+      <div class="panel-header text-center" style={{ position: "relative" }}>
+        <Localizer>
+          <div
+            className="tooltip tooltip-bottom p-absolute"
+            style={{ right: '0.4rem' }}
+            data-tooltip={
+              <Text
+                id={phone.skipContacts ? "without_contacts" : "with_contacts"}
+              />
+            }>
+            <button
+              type="button"
+              className={clsx("btn btn-action", { loading: updateFetching }, phone.skipContacts ? 'btn-error' : 'btn-primary')}
+              onClick={updateSkip.bind(null, !phone.skipContacts)}
+            >
+              {phone.skipContacts ? <UserX /> : <UserCheck />}
+            </button>
+          </div>
+        </Localizer>
+        <div class="panel-title h5 mt-10">{phone.name}</div>
+        <div class="panel-subtitle">{phone.number}</div>
+      </div>
+      <nav class="panel-nav">
+        <ul class="tab tab-block">
+          <li
+            class={clsx({
+              "tab-item": true,
+              active: activeView === "top_softkeys"
+            })}
+          >
+            <a
+              href="#!"
+              class="badge"
+              data-badge={phone.topSoftkeys.length}
+              onClick={changeView.bind(this, "top_softkeys")}
+            >
+              <Text id="top_softkeys" />
+            </a>
+          </li>
+          <li
+            class={clsx({
+              "tab-item": true,
+              active: activeView === "softkeys"
+            })}
+          >
+            <a
+              href="#!"
+              class="badge"
+              data-badge={phone.softkeys.length}
+              onClick={changeView.bind(this, "softkeys")}
+            >
+              <Text id="softkeys" />
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="panel-body" style={{ "overflow-y": "auto" }}>
+        {activeView === "top_softkeys"
+          ? phone.topSoftkeys.map(softkey => (
+              <SoftkeyConfig
+                softkey={softkey}
+                set={updateTopSoftkey.bind(null, softkey.id)}
+                remove={removeTopSoftkey}
+                isTop={true}
+                loading={settingSoftkey}
+              />
+            ))
+          : phone.softkeys.map(softkey => (
+              <SoftkeyConfig
+                softkey={softkey}
+                set={updateSoftkey.bind(null, softkey.id)}
+                remove={removeSoftkey}
+                loading={settingSoftkey}
+              />
+            ))}
+      </div>
+      <div class="panel-footer">
+        <div class="btn-group btn-group-block popover popover-with-trigger">
+          <Localizer>
+            <button
+              type="button"
+              class={clsx("btn btn-primary btn-action tooltip", {
+                loading: transferring
+              })}
+              data-tooltip={<Text id="transfer_config" />}
+              onClick={transferConfig}
+            >
+              <Save />
+            </button>
+          </Localizer>
+          <button
+            type="button"
+            class="btn btn-primary btn-action popover-trigger"
+          >
+            <Plus />
+          </button>
+          {activeView === "top_softkeys" ? (
+            <TopSoftkeyPopover
+              softkey={{ type: "None", id: "new" }}
+              isNew={true}
+              set={addTopSoftkey}
+              loading={settingSoftkey}
+            />
+          ) : (
+            <SoftkeyPopover
+              softkey={{ type: "None", id: "new" }}
+              isNew={true}
+              set={addSoftkey}
+              loading={settingSoftkey}
+            />
+          )}
+          <Localizer>
+            <button
+              type="button"
+              class={clsx("btn btn-primary btn-action tooltip", {
+                loading: copying
+              })}
+              data-tooltip={<Text id="copy_to_all" />}
+              onClick={copyToAll}
+            >
+              <Copy />
+            </button>
+          </Localizer>
+          <Localizer>
+            <button
+              type="button"
+              class={clsx("btn btn-primary btn-action tooltip", {
+                loading: settingSoftkey
+              })}
+              data-tooltip={<Text id="import_softkeys" />}
+              onClick={importSoftkeys}
+            >
+              <Download />
+            </button>
+          </Localizer>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -266,6 +266,22 @@ export class PhoneResolver {
   }
 
 
+  @Mutation(returns => Phone)
+  async importConfigFromPhone(@Arg("id", type => ID) id: string): Promise<Phone> {
+    const phone = await this.phoneRepository.findOneOrFail(id);
+    const api = await this.getPhoneApiById(id);
+
+    const {
+      softkeys,
+      topSoftkeys
+    } = await api.readSoftkeys();
+
+    phone.softkeys = softkeys;
+    phone.topSoftkeys = topSoftkeys;
+
+    return await this.phoneRepository.save(phone);
+  }
+
   @Mutation(returns => Boolean)
   async transferConfigToPhone(@Arg("phoneId", type => ID) phoneId: string) {
     const phone = await this.phoneRepository.findOneOrFail(phoneId, {

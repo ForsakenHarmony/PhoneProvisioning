@@ -1,4 +1,4 @@
-import { Localizer, Text } from "preact-i18n";
+import { Localizer, Text } from "./i18n";
 import clsx from "clsx";
 
 export const PhoneView = ({
@@ -20,7 +20,7 @@ export const PhoneView = ({
         type="text"
         required
         pattern="[\w ]{2,}"
-        form={id}
+        // form={id}
         value={phone.name}
         onChange={update.bind(null, "name")}
         id={`phone.name.${id}`}
@@ -35,7 +35,7 @@ export const PhoneView = ({
         required
         pattern="\d+"
         aria-invalid="true"
-        form={id}
+        // form={id}
         value={phone.number}
         onChange={update.bind(null, "number")}
         id={`phone.number.${id}`}
@@ -48,7 +48,7 @@ export const PhoneView = ({
         class="form-input"
         type="text"
         pattern="(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}"
-        form={id}
+        // form={id}
         value={phone.mac}
         onChange={update.bind(null, "mac")}
         id={`phone.mac.${id}`}

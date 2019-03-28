@@ -11,5 +11,8 @@ export class PhoneInput implements Partial<Phone> {
 
   @Field({ nullable: true })
   mac?: string;
+
+  @Field()
+  skipContacts!: boolean;
 }
 

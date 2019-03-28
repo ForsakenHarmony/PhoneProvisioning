@@ -1,8 +1,6 @@
-import { Text } from "preact-i18n";
-import { connect, mutation } from "@pql/preact";
+import { Text } from "./i18n";
 import { DnD } from "./dnd";
 import { PhoneView } from "./phone-view";
-import { Component } from "react";
 import {
   addPhone,
   removePhone,
@@ -11,204 +9,193 @@ import {
   updatePhone
 } from "../gql/index.gql";
 import clsx from "clsx";
+import { useMutation } from "@pql/boost";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
-class CompanyPhoneView extends Component {
-  state = {
+export function CompanyPhones({ company }) {
+  const [{ fetching: addFetching }, addPhoneMut] = useMutation(addPhone);
+  const [{ fetching: removeFetching }, removePhoneMut] = useMutation(
+    removePhone
+  );
+  const [{ fetching: moveFetching }, movePhonesMut] = useMutation(movePhones);
+  const [{ fetching: transferFetching }, transferMut] = useMutation(
+    transferConfigToAll
+  );
+  const [{ fetching: updateFetching }, updatePhoneMut] = useMutation(
+    updatePhone
+  );
+
+  const loading =
+    addFetching ||
+    removeFetching ||
+    moveFetching ||
+    transferFetching ||
+    updateFetching;
+
+  const [phoneState, setState] = useState({
     name: null,
     mac: null,
     number: null
-  };
+  });
+  const [error, setError] = useState(null);
 
-  removePhone = id => {
-    console.log("remove", id);
-    this.props
-      .removePhone({
-        variables: {
-          id
+  useEffect(async () => {
+    if (!phoneState.name || !phoneState.number || addFetching) return;
+    try {
+      await addPhoneMut({
+        companyId: company.id,
+        phone: phoneState
+      });
+      setState({
+        name: null,
+        mac: null,
+        number: null
+      });
+      setError(null);
+    } catch (e) {
+      setError(e);
+    }
+  }, [phoneState, company.id, addFetching, error]);
+
+  const updateState = useCallback(
+    (field, e) => {
+      setState(s => ({ ...s, [field]: e.target.value }));
+    },
+    [setState]
+  );
+
+  const remove = useCallback(
+    id => {
+      removePhoneMut({ id })
+        .then(() => setError(null))
+        .catch(e => setError(e));
+    },
+    [removePhoneMut]
+  );
+
+  const update = useCallback(
+    (id, field, e) => {
+      const phone = company.phones.find(p => p.id === id);
+      phone[field] = e.target.value;
+      if (!phone) return;
+      updatePhoneMut({
+        id,
+        phone: {
+          name: phone.name,
+          number: phone.number,
+          mac: phone.mac,
+          skipContacts: phone.skipContacts
         }
       })
-      .then(this.clearError)
-      .catch(this.setError);
-  };
+        .then(() => setError(null))
+        .catch(e => setError(e));
+    },
+    [updatePhoneMut, company]
+  );
 
-  updatePhone = (id, field, e) => {
-    console.log("update", id, field, e);
-    const phone = this.props.company.phones.find(p => p.id === id);
-    phone[field] = e.target.value;
-    if (!phone) return;
-    this.props
-      .updatePhone({
-        variables: {
-          id,
-          phone: {
-            name: phone.name,
-            number: phone.number,
-            mac: phone.mac
-          }
-        }
+  const move = useCallback(
+    (from, to) => {
+      movePhonesMut({
+        from,
+        to
       })
-      .then(this.clearError)
-      .catch(this.setError);
-  };
+        .then(() => setError(null))
+        .catch(e => setError(e));
+    },
+    [movePhonesMut]
+  );
 
-  addPhone = (field, e) => {
-    console.log("add", field, e);
-    this.setState({ [field]: e.target.value }, () => {
-      if (!e.target.validity.valid) return;
-      if (this.state.name && this.state.number) {
-        this.props
-          .addPhone({
-            variables: {
-              companyId: this.props.company.id,
-              phone: {
-                name: this.state.name,
-                number: this.state.number,
-                mac: this.state.mac
-              }
-            }
-          })
-          .then(() => {
-            this.setState({
-              name: null,
-              mac: null,
-              number: null
-            });
-          })
-          .then(this.clearError)
-          .catch(this.setError);
-      }
-    });
-  };
+  const transfer = useCallback(() => {
+    transferMut({
+      companyId: company.id
+    })
+      .then(() => setError(null))
+      .catch(e => setError(e));
+  }, [transferMut, company]);
 
-  submitPhone = (id, e) => {
-    console.log("submit", id, e);
-  };
-
-  move = (from, to) => {
-    this.props
-      .swapPhones({
-        variables: {
-          from,
-          to
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError);
-  };
-
-  transferConfig = () => {
-    this.props
-      .transferConfig({
-        variables: {
-          companyId: this.props.company.id
-        }
-      })
-      .then(this.clearError)
-      .catch(this.setError);
-  };
-
-  clearError = () => {
-    this.setState({ error: null });
-  };
-
-  setError = error => {
-    this.setState({ error });
-  };
-
-  render({ company, loading }, { error }) {
-    return (
-      <div class="card card-phones">
-        <div class="card-header">
-          <div class="card-title h5">
-            <Text id="phones" />
-            {error && <div class="bg-error">{JSON.stringify(error)}</div>}
-          </div>
-        </div>
-        <div class="card-body">
-          {company.phones.map(phone => (
-            <form
-              id={phone.id}
-              onSubmit={this.submitPhone.bind(null, phone.id)}
-            >
-              <button style={{ display: "none" }} />
-            </form>
-          ))}
-          <form id="new" onSubmit={this.submitPhone.bind(null, "new")}>
-            <button style={{ display: "none" }} />
-          </form>
-          <table class="table" style="position: relative">
-            <thead>
-              <tr>
-                <th />
-                <th>
-                  <Text id="name" />
-                </th>
-                <th>
-                  <Text id="number" />
-                </th>
-                <th>
-                  <Text id="mac" />
-                </th>
-                <th>
-                  <Text id="status" />
-                </th>
-                <th />
-              </tr>
-            </thead>
-            <DnD
-              handle={({ ...props }) => (
-                <button class={clsx("btn btn-action", { loading })} type="button" {...props}>
-                  <i class="icon icon-resize-vert" />
-                </button>
-              )}
-              container={({ children, ...props }) => (
-                <tbody {...props}>
-                  {children}
-                  <PhoneView
-                    id="new"
-                    phone={this.state}
-                    update={this.addPhone}
-                    last={true}
-                  />
-                </tbody>
-              )}
-              item={({ data, ...props }) => (
-                <PhoneView
-                  phone={data}
-                  id={data.id}
-                  remove={this.removePhone.bind(null, data.id)}
-                  update={this.updatePhone.bind(null, data.id)}
-                  {...props}
-                />
-              )}
-              items={company.phones}
-              onMove={this.move}
-            />
-          </table>
-        </div>
-
-        <div class="card-footer">
-          <button
-            class={clsx("btn btn-primary", { "loading": loading })}
-            onClick={this.transferConfig}
-          >
-            <Text id="transfer_config" />
-          </button>
+  return (
+    <div class="card card-phones">
+      <div class="card-header">
+        <div class="card-title h5">
+          <Text id="phones" />
+          {error && <div class="bg-error">{JSON.stringify(error)}</div>}
         </div>
       </div>
-    );
-  }
-}
+      <div class="card-body">
+        {/*{company.phones.map(phone => (*/}
+        {/*  <form*/}
+        {/*    id={phone.id}*/}
+        {/*    onSubmit={this.submitPhone.bind(null, phone.id)}*/}
+        {/*  >*/}
+        {/*    <button style={{ display: "none" }} />*/}
+        {/*  </form>*/}
+        {/*))}*/}
+        {/*<form id="new" onSubmit={this.submitPhone.bind(null, "new")}>*/}
+        {/*  <button style={{ display: "none" }} />*/}
+        {/*</form>*/}
+        <table class="table" style="position: relative">
+          <thead>
+            <tr>
+              <th />
+              <th>
+                <Text id="name" />
+              </th>
+              <th>
+                <Text id="number" />
+              </th>
+              <th>
+                <Text id="mac" />
+              </th>
+              <th>
+                <Text id="status" />
+              </th>
+              <th />
+            </tr>
+          </thead>
+          <DnD
+            handle={({ ...props }) => (
+              <button
+                class={clsx("btn btn-action", { loading })}
+                type="button"
+                {...props}
+              >
+                <i class="icon icon-resize-vert" />
+              </button>
+            )}
+            container={({ children, ...props }) => (
+              <tbody {...props}>
+                {children}
+                <PhoneView
+                  id="new"
+                  phone={phoneState}
+                  update={updateState}
+                  last={true}
+                />
+              </tbody>
+            )}
+            item={({ data, ...props }) => (
+              <PhoneView
+                phone={data}
+                id={data.id}
+                remove={remove.bind(null, data.id)}
+                update={update.bind(null, data.id)}
+                {...props}
+              />
+            )}
+            items={company.phones}
+            onMove={move}
+          />
+        </table>
+      </div>
 
-export const CompanyPhones = connect(
-  CompanyPhoneView,
-  {
-    mutation: {
-      addPhone: mutation(addPhone),
-      updatePhone: mutation(updatePhone),
-      removePhone: mutation(removePhone),
-      swapPhones: mutation(movePhones),
-      transferConfig: mutation(transferConfigToAll)
-    }
-  }
-);
+      <div class="card-footer">
+        <button
+          class={clsx("btn btn-primary", { loading: loading })}
+          onClick={transfer}
+        >
+          <Text id="transfer_config" />
+        </button>
+      </div>
+    </div>
+  );
+}

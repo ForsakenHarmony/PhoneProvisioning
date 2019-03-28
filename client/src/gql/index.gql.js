@@ -1,4 +1,4 @@
-import { gql } from "../macro";
+import { gql } from "@pql/macro";
 
 export const companies = gql`
   query companies {
@@ -11,6 +11,7 @@ export const companies = gql`
         number
         mac
         status
+        skipContacts
         topSoftkeys {
           id
           type
@@ -39,6 +40,7 @@ export const company = gql`
         number
         mac
         status
+        skipContacts
         topSoftkeys {
           id
           type
@@ -78,6 +80,7 @@ export const addPhone = gql`
       number
       mac
       status
+      skipContacts
       topSoftkeys {
         id
         type
@@ -226,6 +229,7 @@ export const phoneStatus = gql`
         number
         mac
         status
+        skipContacts
         topSoftkeys {
           id
           type
@@ -253,6 +257,7 @@ export const exportCompany = gql`
         number
         mac
         idx
+        skipContacts
         softkeys {
           type
           label
@@ -286,6 +291,14 @@ export const importCompany = gql`
 export const removeCompany = gql`
   mutation removeCompany($companyId: ID!) {
     removeCompany(companyId: $companyId) {
+      id
+    }
+  }
+`;
+
+export const importFromPhone = gql`
+  mutation importFromPhone($id: ID!) {
+    importConfigFromPhone(id: $id) {
       id
     }
   }

@@ -27,6 +27,10 @@ export const definition = {
   edit_softkey: "Softkey bearbeiten",
   export: "Konfig exportieren",
   import: "Konfig importieren",
+  import_softkeys: "Softkeys importieren",
+  remove_company: "Kunden löschen",
+  with_contacts: "Mit Kontakten",
+  without_contacts: "Ohne Kontakte",
   softkey: {
     "": "Kein",
     line: "Leitung",

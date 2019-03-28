@@ -41,12 +41,12 @@ export class PhoneApi {
     public name: string,
     readonly mac: string = "",
     private readonly log: (message: string) => void = logFn.bind(null, "phone_api"),
-    private readonly ip = Container.get(ArpHelper).findIpForMac(mac),
+    private readonly ip = Container.get(ArpHelper).findIpForMac(mac)
   ) {
     if (ip)
       this.axios = createAxios(ip, defaultCredentials);
     else
-      log(`Phone API initialized without IP: ${name}`)
+      log(`Phone API initialized without IP: ${name}`);
   }
 
   async restart() {
@@ -100,7 +100,7 @@ export class PhoneApi {
   async ensurePushList() {
     this.assertHasIP();
 
-    const res = await this.get("/configurationServer.html");
+    const res = await this.get<string>("/configurationServer.html");
     const form = parseForm(stripToContent(res.data))[0];
     const postList = form.fields.postList;
 
@@ -135,9 +135,45 @@ export class PhoneApi {
         type: TopSoftkeyTypes.Blf,
         label: phone.name,
         value: phone.number.toString(),
-      }
+      };
     }));
     await this.postRpc(xml);
+  }
+
+  async readConfig(): Promise<{[key: string]: string}> {
+    const { data: serverData } = await this.get<string>("/servercfg.html");
+    const { data: localData } = await this.get<string>("/localcfg.html");
+
+    return (serverData + "\n" + localData)
+      .split("\n")
+      .filter(line => !line.trim().startsWith("#"))
+      .filter(Boolean)
+      .map(line => line.trim().split(":").map(part => part.trim()).filter(Boolean))
+      .reduce((acc, [k, ...val]) => Object.assign(acc, { [k]: val.join(":") }), {});
+  }
+
+  async readSoftkeys(): Promise<{ softkeys: Softkey[], topSoftkeys: TopSoftkey[]}> {
+    const cfg = await this.readConfig();
+    const softkeys: Softkey[] = [];
+    const topSoftkeys: TopSoftkey[] = [];
+
+    for (let key in cfg) {
+      const res = key.match(/^(?:top)?softkey(\d*) (\w+)$/);
+      if (res) {
+        let idx = parseInt(res[1], 10) - 1;
+        let field = res[2];
+        const arr: (Softkey | TopSoftkey)[] = key.startsWith('top') ? topSoftkeys : softkeys;
+        const softkey: any = (arr[idx] || (arr[idx] = key.startsWith('top') ? new TopSoftkey() : new Softkey()));
+        softkey[field] = cfg[key];
+      }
+    }
+
+    console.log(softkeys, topSoftkeys);
+
+    return {
+      softkeys: softkeys.filter(Boolean).filter(s => s.type),
+      topSoftkeys: topSoftkeys.filter(Boolean).filter(s => s.type),
+    }
   }
 
   private async createOrConfirmSession(tries: number = 5): Promise<undefined> {
@@ -156,24 +192,24 @@ export class PhoneApi {
     }
   }
 
-  private async get(path: string) {
+  private async get<T = any>(path: string) {
     await this.createOrConfirmSession();
-    return this.axios!.get(path);
+    return this.axios!.get<T>(path);
   }
 
-  private async post(url: string, data?: any, config?: AxiosRequestConfig) {
+  private async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
     await this.createOrConfirmSession();
-    return this.axios!.post(url, data);
+    return this.axios!.post<T>(url, data, config);
   }
 
-  private async postUrlEncoded(url: string, data: any) {
-    return this.post(url, new URLSearchParams(data));
+  private async postUrlEncoded<T = any>(url: string, data: any) {
+    return this.post<T>(url, new URLSearchParams(data));
   }
 
-  private async postRpc(xml: string) {
+  private async postRpc<T = any>(xml: string) {
     this.log(`[RPC] ${JSON.stringify(xml)}`);
     await this.ensurePushList();
-    return this.post("/", xml, {
+    return this.post<T>("/", xml, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       }

@@ -35,6 +35,7 @@ type Mutation {
   removeSoftkey(id: ID!): Softkey!
   copyToAll(phoneId: ID!): Company!
   resetPhone(phoneId: ID!): Boolean!
+  importConfigFromPhone(id: ID!): Phone!
   transferConfigToPhone(phoneId: ID!): Boolean!
 }
 
@@ -44,6 +45,7 @@ type Phone {
   name: String!
   number: String!
   mac: String
+  skipContacts: Boolean
   company: Company!
   softkeys: [Softkey!]!
   topSoftkeys: [TopSoftkey!]!
@@ -54,6 +56,7 @@ input PhoneInput {
   name: String!
   number: String!
   mac: String
+  skipContacts: Boolean!
 }
 
 type PhoneNotification {

@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosRequestConfig, default as axiosFactory } from "axios";
-import { PhoneStatus } from "../resolvers/types/phone-notification";
+import { PhoneNotificationPayload, PhoneStatus } from "../resolvers/types/phone-notification";
 import { parseForm, stripToContent } from "./parse-forms";
 import { Softkey } from "../entities/softkey";
 import { TopSoftkey } from "../entities/top-softkey";
@@ -11,18 +11,20 @@ import { ArpHelper } from "./networking/arp-helpers";
 import { Container } from "typedi";
 import { Phone } from "../entities/phone";
 import { TopSoftkeyTypes } from "../constants";
-
-// type Obj = { [key: string]: string | string[] | undefined };
+import { Publisher } from "type-graphql";
 
 export class PhoneApiProvider {
   private apiCache: { [mac: string]: PhoneApi } = {};
 
-  getPhoneApi({ name, mac }: Phone): PhoneApi {
-    if (!mac) return new PhoneApi(name);
+  getPhoneApi(phone: Phone, publish: Publisher<PhoneNotificationPayload>): PhoneApi {
+    const { mac, name, id } = phone;
+    if (!mac) return new PhoneApi(phone, publish);
 
-    const api = this.apiCache[mac] || (this.apiCache[mac] = new PhoneApi(name, mac));
+    const api = this.apiCache[mac] || (this.apiCache[mac] = new PhoneApi(phone, publish));
     if (api.name !== name)
       api.name = name;
+    if (api.id !== id)
+      api.id = id;
 
     return api;
   }
@@ -34,19 +36,52 @@ const defaultCredentials = {
 };
 
 export class PhoneApi {
-  private readonly axios?: AxiosInstance;
-  status: PhoneStatus = PhoneStatus.Loading;
+  private _axios?: AxiosInstance;
+  private readonly log: (message: string) => void = logFn.bind(null, "phone_api");
+  public watched = false;
 
   constructor(
-    public name: string,
-    readonly mac: string = "",
-    private readonly log: (message: string) => void = logFn.bind(null, "phone_api"),
-    private readonly ip = Container.get(ArpHelper).findIpForMac(mac)
+    phone: Phone,
+    private publish: Publisher<PhoneNotificationPayload>,
+    public name: string = phone.name,
+    readonly mac: string = phone.mac || "",
+    public id: string = phone.id,
+    private ip = Container.get(ArpHelper).findIpForMac(mac),
+    private _status = mac ? PhoneStatus.Loading : PhoneStatus.Nonexistent,
   ) {
-    if (ip)
-      this.axios = createAxios(ip, defaultCredentials);
-    else
-      log(`Phone API initialized without IP: ${name}`);
+    if (!ip && mac !== "") {
+      Container.get(ArpHelper).waitForIp(mac).then((ip) => {
+        if (ip) {
+          this.ip = ip;
+        } else {
+          this.log(`Phone API initialized without IP: ${name}`);
+        }
+        return this.check();
+      }).catch(() => {});
+    } else if (ip) {
+      this.check().catch(() => {});
+    }
+  }
+
+  get status() {
+    return this._status;
+  }
+
+  set status(status: PhoneStatus) {
+    if (this._status !== status && this.watched)
+      this.publish({ id: this.id, status });
+    this._status = status;
+  }
+
+  get axios() {
+    const ip = Container.get(ArpHelper).findIpForMac(this.mac);
+    if (ip && (!this.ip || this.ip !== ip || !this._axios)) {
+      return (this._axios = createAxios(ip, defaultCredentials));
+    } else if (!ip) {
+      throw new Error(`Phone API can't resolve IP: ${this.name}`)
+    }
+
+    return this._axios;
   }
 
   async restart() {
@@ -67,50 +102,25 @@ export class PhoneApi {
     });
   }
 
-  static async check(mac: string) {
-    const arpHelper = Container.get(ArpHelper);
-    const ip = arpHelper.findIpForMac(mac);
-    logFn("phone_api", `check: ${ip}`);
+  async check() {
+    // logFn("phone_api", `check: ${this.ip}`);
     try {
-      if (ip) {
-        await axiosFactory.get(`http://${ip}/`, {
+      if (this.ip) {
+        await axiosFactory.get(`http://${this.ip}/`, {
           auth: defaultCredentials
         });
-        return PhoneStatus.Online;
+        this.status = PhoneStatus.Online;
+      } else {
+        this.status = PhoneStatus.Offline;
       }
     } catch (e) {
       if (e.response) {
-        return PhoneStatus.Online;
+        this.status = PhoneStatus.Online;
+      } else {
+        this.status = PhoneStatus.Offline;
       }
     }
-    return PhoneStatus.Offline;
-  }
-
-  assertHasIP() {
-    if (!this.ip)
-      throw new Error(`You can't contact a phone without a MAC (${this.name})`);
-  }
-
-  findSharedSubnetIP() {
-    this.assertHasIP();
-
-    return getLocalSharedSubnetIP(this.ip!);
-  }
-
-  async ensurePushList() {
-    this.assertHasIP();
-
-    const res = await this.get<string>("/configurationServer.html");
-    const form = parseForm(stripToContent(res.data))[0];
-    const postList = form.fields.postList;
-
-    const localIp = this.findSharedSubnetIP();
-
-    if (!postList.includes(localIp)) {
-      await this.postUrlEncoded("/configurationServer.html", {
-        postList: postList + "," + localIp
-      });
-    }
+    return this.status;
   }
 
   async setLocalConfigServer() {
@@ -149,7 +159,7 @@ export class PhoneApi {
       .filter(line => !line.trim().startsWith("#"))
       .filter(Boolean)
       .map(line => line.trim().split(":").map(part => part.trim()).filter(Boolean))
-      .reduce((acc, [k, ...val]) => Object.assign(acc, { [k]: val.join(":") }), {});
+      .reduce((acc, [k, ...val]) => Object.assign(acc, { [k]: val.join(":").replace(/^"(.+)"$/, "$1") }), {});
   }
 
   async readSoftkeys(): Promise<{ softkeys: Softkey[], topSoftkeys: TopSoftkey[]}> {
@@ -168,11 +178,37 @@ export class PhoneApi {
       }
     }
 
-    console.log(softkeys, topSoftkeys);
-
     return {
       softkeys: softkeys.filter(Boolean).filter(s => s.type),
       topSoftkeys: topSoftkeys.filter(Boolean).filter(s => s.type),
+    }
+  }
+
+  assertHasIP() {
+    if (!this.ip)
+      throw new Error(`You can't contact a phone without a MAC (${this.name})`);
+  }
+
+  findSharedSubnetIP() {
+    this.assertHasIP();
+
+    return getLocalSharedSubnetIP(this.ip!);
+  }
+
+  async ensurePushList() {
+    await this.createOrConfirmSession();
+
+    const res = await this.get<string>("/configurationServer.html");
+    const form = parseForm(stripToContent(res.data))[0];
+    const postList = form.fields.postList;
+
+    const localIp = this.findSharedSubnetIP();
+    console.log(form, postList, localIp);
+
+    if (!postList.includes(localIp)) {
+      await this.postUrlEncoded("/configurationServer.html", {
+        postList: postList ? postList + "," + localIp : localIp
+      });
     }
   }
 
@@ -180,15 +216,19 @@ export class PhoneApi {
     this.assertHasIP();
     try {
       await this.axios!.get("/");
+      this.status = PhoneStatus.Online;
       return;
     } catch (e) {
       if (!e.response) {
         tries = 1;
       }
       if (tries <= 1) {
+        this.status = PhoneStatus.Offline;
+        if (this.ip && this.watched)
+          setTimeout(() => this.createOrConfirmSession(), 15 * 1000);
         throw e;
       }
-      return await this.createOrConfirmSession(tries - 1);
+      return this.createOrConfirmSession(tries - 1);
     }
   }
 
@@ -232,14 +272,17 @@ function createAxios(ip: string, auth: { username: string, password: string }) {
     return Promise.reject(err);
   });
   axios.interceptors.response.use(res => {
-    alog(`[<-] ${res.config.url} [${res.status}]`);
-    if (res.data.startsWith("<!DOCTYPE")) {
-      alog(`[<-] ${JSON.stringify(stripToContent(res.data))}`);
-    }
+    alog(`[<-] ${res.config && res.config.url} [${res.status}]`);
+    // if (res.data.startsWith("<!DOCTYPE")) {
+    //   alog(`[<-] ${JSON.stringify(stripToContent(res.data))}`);
+    // }
     return res;
   }, err => {
     if (err.request) {
-      alog(`[<x] ${err.request.config.url} [${err.request.status}]`);
+      alog(`[<x] ${err.request.config && err.request.config.url} [${err.request.status}]`);
+      if (!err.request.config) {
+        console.error(err);
+      }
     } else {
       alog(`[xx] ${err && err.message}`);
     }

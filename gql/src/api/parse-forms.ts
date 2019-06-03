@@ -43,11 +43,11 @@ export function parseForm(doc: string) {
       },
       option() {
         if (selected)
-          activeForm.fields[acc.active] = value;
+          activeForm.fields[acc.active] = value || '';
       },
       input() {
         if (type !== "submit")
-          activeForm.fields[name] = value;
+          activeForm.fields[name] = value || '';
       }
     };
 

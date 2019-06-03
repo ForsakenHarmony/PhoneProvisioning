@@ -7,6 +7,8 @@ import { Container } from "typedi";
 import { PhoneApiProvider } from "../api/phone-api";
 import { Phone } from "../entities/phone";
 import { RawCompany } from "./types/raw-company";
+import { PubSub } from "graphql-subscriptions";
+import { PhoneMessages } from "../constants";
 
 @Resolver(Company)
 export class CompanyResolver {
@@ -53,11 +55,13 @@ export class CompanyResolver {
     });
 
     const provider = Container.get(PhoneApiProvider);
+    const pubSub = Container.get<PubSub>("PB");
+    const publish = pubSub.publish.bind(pubSub, PhoneMessages);
 
     await Promise.all(phones.map(async phone => {
-      const api = provider.getPhoneApi(phone);
+      const api = provider.getPhoneApi(phone, publish);
       await api.updateSoftkeys(await phone.softkeys);
-      await api.updateTopSoftkeys(await phone.topSoftkeys, phones.filter(p => p.id !== phone.id));
+      await api.updateTopSoftkeys(await phone.topSoftkeys, phone.skipContacts ? [] : phones.filter(p => p.id !== phone.id));
     }));
 
     return true;
@@ -77,6 +81,7 @@ export class CompanyResolver {
           name: phone.name,
           number: phone.number,
           mac: phone.mac,
+          skipContacts: phone.skipContacts,
           softkeys: softkeys.map(({ type, label, value, line, busy, connected, idle, incoming, outgoing }) => ({
             type,
             label,

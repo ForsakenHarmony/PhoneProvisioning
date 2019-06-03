@@ -10,7 +10,7 @@ import {
   topSoftkeyTypes
 } from "../constants";
 import { isLabelDisabled, isValueDisabled } from "../utils";
-import { useCallback } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
 export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
   softkey,
@@ -21,12 +21,25 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
 }) => {
   const { id, type, label, value } = softkey;
 
+  const [localSoftkey, updateSoftkey] = useState({ type, label, value });
+
+  useEffect(() => {
+    updateSoftkey({ type, label, value });
+  }, [type, label, value]);
+
   const submit = useCallback(
     e => {
       e.preventDefault();
-      set({ type, label, value });
+      set(localSoftkey);
     },
-    [softkey]
+    [localSoftkey]
+  );
+
+  const update = useCallback(
+    field => {
+      return e => updateSoftkey(s => ({ ...s, [field]: e.target.value }));
+    },
+    [updateSoftkey]
   );
 
   return (
@@ -38,8 +51,8 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
               <select
                 class="form-select"
                 id={`${id}.type`}
-                value={type}
-                onChange={e => (softkey.type = e.target.value)}
+                value={localSoftkey.type}
+                onChange={update("type")}
               >
                 {types.map(type => (
                   <option value={ValToEnum[type]}>
@@ -48,29 +61,29 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
                 ))}
               </select>
             </div>
-            {isLabelDisabled(EnumToVal[type]) ? null : (
+            {isLabelDisabled(EnumToVal[localSoftkey.type]) ? null : (
               <div class="form-group">
                 <Localizer>
                   <input
                     class="form-input"
                     type="text"
                     id={`${id}.label`}
-                    value={label}
-                    onChange={e => (softkey.label = e.target.value)}
+                    value={localSoftkey.label}
+                    onChange={update("label")}
                     placeholder={<Text id="label" />}
                   />
                 </Localizer>
               </div>
             )}
-            {isValueDisabled(EnumToVal[type]) ? null : (
+            {isValueDisabled(EnumToVal[localSoftkey.type]) ? null : (
               <div class="form-group">
                 <Localizer>
                   <input
                     class="form-input"
                     type="text"
                     id={`${id}.value`}
-                    value={value}
-                    onChange={e => (softkey.value = e.target.value)}
+                    value={localSoftkey.value}
+                    onChange={update("value")}
                     placeholder={<Text id="value" />}
                   />
                 </Localizer>

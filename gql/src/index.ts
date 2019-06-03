@@ -3,31 +3,30 @@ import "sqlite3";
 import { Container } from "typedi";
 import { createConnection, useContainer as ormUseContainer } from "typeorm";
 import { SqliteConnectionOptions } from "typeorm/driver/sqlite/SqliteConnectionOptions";
-import { buildSchema, formatArgumentValidationError, useContainer as gqlUseContainer } from "type-graphql";
+import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-express";
 import { PubSub } from "graphql-subscriptions";
 import express from "express";
 import net from "net";
-import opn from 'opn';
+import opn from 'open';
 
 import { ArpHelper } from "./api/networking/arp-helpers";
 import { Company } from "./entities/company";
 import { Phone } from "./entities/phone";
 import { Softkey } from "./entities/softkey";
 import { TopSoftkey } from "./entities/top-softkey";
-import { Initial1547829364100 } from "./migration/1547829364100-Initial";
+import { initial1559140753150 } from "./migration/1559140753150-initial";
 import { CompanyResolver } from "./resolvers/companyResolver";
 import { PhoneResolver } from "./resolvers/phoneResolver";
 
 // register 3rd party IOC container
-gqlUseContainer(Container);
 ormUseContainer(Container);
 
 void (async function bootstrap() {
   process.env.NODE_ENV = process.env.NODE_ENV || "production";
   const isProd = process.env.NODE_ENV === "production";
 
-  Container.get(ArpHelper);
+  Container.get(ArpHelper).execArp();
 
   const ormConfig: SqliteConnectionOptions = {
     type: "sqlite",
@@ -42,7 +41,7 @@ void (async function bootstrap() {
       TopSoftkey
     ],
     migrations: [
-      Initial1547829364100
+      initial1559140753150
     ],
     migrationsRun: isProd
     // dropSchema: true,
@@ -57,6 +56,7 @@ void (async function bootstrap() {
   const schema = await buildSchema({
     resolvers: [CompanyResolver, PhoneResolver],
     emitSchemaFile: !isProd && "../schema.graphql",
+    container: Container,
     pubSub
   });
 
@@ -68,9 +68,6 @@ void (async function bootstrap() {
   // Create GraphQL server
   const server = new ApolloServer({
     schema,
-    // remember to pass `formatArgumentValidationError`
-    // otherwise validation errors won't be returned to a client
-    formatError: formatArgumentValidationError,
     introspection: true,
     playground: !isProd,
     uploads: false,

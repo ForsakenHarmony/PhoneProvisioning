@@ -11,17 +11,14 @@ import { PhoneApi } from "../api";
 import { Softkey } from "../entities/softkey";
 import { SoftkeyInput } from "./types/softkey-input";
 import { PubSub } from "graphql-subscriptions";
-import flru, { FLru } from 'flru';
 import { PhoneApiProvider } from "../api/phone-api";
 import { Container } from "typedi";
 import { PhoneMessages } from "../constants";
 
 @Resolver(Phone)
 export class PhoneResolver {
-  private watchedPhones: { [key: string]: {companyId: string} } = {};
-  private watchedCompanies: string[] = [];
+  private watchedPhones: PhoneApi[] = [];
   private readonly publish: Publisher<PhoneNotificationPayload>;
-  private statusCache: FLru<PhoneStatus> = flru();
 
   constructor(
     @InjectRepository(Company) private readonly companyRepository: Repository<Company>,
@@ -31,31 +28,11 @@ export class PhoneResolver {
   ) {
     const pubSub = Container.get<PubSub>("PB");
     this.publish = pubSub.publish.bind(pubSub, PhoneMessages);
-    setInterval(this.checkPhones.bind(this), 5000);
-  }
-
-  checkPhones() {
-    Promise.all(Object.keys(this.watchedPhones).map(async id => {
-      const { companyId } = this.watchedPhones[id];
-      if (this.watchedCompanies.includes(companyId)) {
-        const phone = await this.phoneRepository.findOne(id);
-        if (!phone || !phone.mac) return;
-        const status = await this.checkPhone(phone.mac);
-        this.publish({ id, status });
-      }
-    })).then(() => {
-    });
-  }
-
-  async checkPhone(mac: string) {
-    const status = await PhoneApi.check(mac);
-    this.statusCache.set(mac, status);
-    return status;
   }
 
   private getPhoneApi(phone: Phone): PhoneApi {
     const provider = Container.get(PhoneApiProvider);
-    return provider.getPhoneApi(phone);
+    return provider.getPhoneApi(phone, this.publish);
   }
 
   private getPhoneApiById(id: string): Promise<PhoneApi> {
@@ -64,15 +41,8 @@ export class PhoneResolver {
 
   @FieldResolver(returns => PhoneStatus)
   async status(@Root() phone: Phone): Promise<PhoneStatus> {
-    if (!phone.mac)
-      return PhoneStatus.Nonexistent;
-
-    const status = this.statusCache.get(phone.mac);
-
-    if (!status || status === PhoneStatus.Loading)
-      return await this.checkPhone(phone.mac);
-
-    return status;
+    if (!phone.mac) return PhoneStatus.Nonexistent;
+    return this.getPhoneApi(phone).status;
   }
 
   @Query(returns => Boolean)
@@ -86,13 +56,12 @@ export class PhoneResolver {
   async setActiveCompany(@Arg("companyId", type => ID) companyId: string) {
     const company = await this.companyRepository.findOneOrFail(companyId, { relations: ["phones"] });
 
-    this.watchedCompanies = [company.id];
-
-    await Promise.all((await company.phones).map(async phone => {
-      if (!this.watchedPhones[phone.id])
-        this.watchedPhones[phone.id] = { companyId: company.id };
-      await this.status(phone);
-    }));
+    this.watchedPhones.map(api => api.watched = false);
+    this.watchedPhones = (await company.phones).map(phone => {
+      const api = this.getPhoneApi(phone);
+      api.watched = true;
+      return api;
+    });
 
     return true;
   }
@@ -289,10 +258,9 @@ export class PhoneResolver {
     });
     const phones = await (await phone.company).phones;
 
-    const provider = Container.get(PhoneApiProvider);
-    const api = provider.getPhoneApi(phone);
+    const api = this.getPhoneApi(phone);
     await api.updateSoftkeys(await phone.softkeys);
-    await api.updateTopSoftkeys(await phone.topSoftkeys, phones.filter(p => p.id !== phone.id));
+    await api.updateTopSoftkeys(await phone.topSoftkeys, phone.skipContacts ? [] : phones.filter(p => p.id !== phone.id));
 
     return true;
   }

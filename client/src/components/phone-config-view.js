@@ -84,57 +84,35 @@ export function PhoneConfig({ phone }) {
     [updatePhoneMut, phone]
   );
 
-  const importSoftkeys = useManagedMutation(
-    setSettingSoftkey,
-    setError,
-    importConfigM,
-    () => ({ id: phone.id }),
-    [phone.id]
-  );
+  function useManagedSoftkey(mut, varFn) {
+    return useManagedMutation(setSettingSoftkey, setError, mut, varFn, [
+      phone.id
+    ]);
+  }
 
-  const addTopSoftkey = useManagedMutation(
-    setSettingSoftkey,
-    setError,
-    addTopSoftkeyM,
-    softkey => ({ phoneId: phone.id, softkey }),
-    [phone.id]
-  );
-  const removeTopSoftkey = useManagedMutation(
-    setSettingSoftkey,
-    setError,
-    removeTopSoftkeyM,
-    id => ({ id }),
-    [phone.id]
-  );
-  const updateTopSoftkey = useManagedMutation(
-    setSettingSoftkey,
-    setError,
+  const importSoftkeys = useManagedSoftkey(importConfigM, () => ({
+    id: phone.id
+  }));
+
+  const addTopSoftkey = useManagedSoftkey(addTopSoftkeyM, softkey => ({
+    phoneId: phone.id,
+    softkey
+  }));
+  const removeTopSoftkey = useManagedSoftkey(removeTopSoftkeyM, id => ({ id }));
+  const updateTopSoftkey = useManagedSoftkey(
     updateTopSoftkeyM,
-    (id, softkey) => ({ id, softkey }),
-    [phone.id]
+    (id, softkey) => ({ id, softkey })
   );
 
-  const addSoftkey = useManagedMutation(
-    setSettingSoftkey,
-    setError,
-    addSoftkeyM,
-    softkey => ({ phoneId: phone.id, softkey }),
-    [phone.id]
-  );
-  const removeSoftkey = useManagedMutation(
-    setSettingSoftkey,
-    setError,
-    removeSoftkeyM,
-    id => ({ id }),
-    [phone.id]
-  );
-  const updateSoftkey = useManagedMutation(
-    setSettingSoftkey,
-    setError,
-    updateSoftkeyM,
-    (id, softkey) => ({ id, softkey }),
-    [phone.id]
-  );
+  const addSoftkey = useManagedSoftkey(addSoftkeyM, softkey => ({
+    phoneId: phone.id,
+    softkey
+  }));
+  const removeSoftkey = useManagedSoftkey(removeSoftkeyM, id => ({ id }));
+  const updateSoftkey = useManagedSoftkey(updateSoftkeyM, (id, softkey) => ({
+    id,
+    softkey
+  }));
 
   const copyToAll = useManagedMutation(
     setCopying,
@@ -157,15 +135,20 @@ export function PhoneConfig({ phone }) {
         <Localizer>
           <div
             className="tooltip tooltip-bottom p-absolute"
-            style={{ right: '0.4rem' }}
+            style={{ right: "0.4rem" }}
             data-tooltip={
               <Text
                 id={phone.skipContacts ? "without_contacts" : "with_contacts"}
               />
-            }>
+            }
+          >
             <button
               type="button"
-              className={clsx("btn btn-action", { loading: updateFetching }, phone.skipContacts ? 'btn-error' : 'btn-primary')}
+              className={clsx(
+                "btn btn-action",
+                { loading: updateFetching },
+                phone.skipContacts ? "btn-error" : "btn-primary"
+              )}
               onClick={updateSkip.bind(null, !phone.skipContacts)}
             >
               {phone.skipContacts ? <UserX /> : <UserCheck />}
@@ -209,7 +192,7 @@ export function PhoneConfig({ phone }) {
           </li>
         </ul>
       </nav>
-      <div class="panel-body" style={{ "overflow-y": "auto" }}>
+      <div class="panel-body">
         {activeView === "top_softkeys"
           ? phone.topSoftkeys.map(softkey => (
               <SoftkeyConfig

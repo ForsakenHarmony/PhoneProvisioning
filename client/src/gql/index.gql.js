@@ -62,6 +62,27 @@ export const addCompany = gql`
   mutation addCompany($name: String!) {
     addCompany(company: { name: $name }) {
       id
+      name
+      phones {
+        id
+        name
+        number
+        mac
+        status
+        skipContacts
+        topSoftkeys {
+          id
+          type
+          label
+          value
+        }
+        softkeys {
+          id
+          type
+          label
+          value
+        }
+      }
     }
   }
 `;

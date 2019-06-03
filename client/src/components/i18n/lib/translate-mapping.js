@@ -27,7 +27,7 @@ export default function translateMapping(props, intl, onlyTextNodes) {
         out[name] = translate(def, intl.scope, intl.dictionary);
       } else if (def.type === Text) {
         // it's a <Text />, just grab its props:
-        let c = toChildArray(def.children);
+        let c = toChildArray(def.props.children);
         def = assign(
           {
             //no fallback if there are no children.  Return first child if there is only 1, or array of children if there are more than one

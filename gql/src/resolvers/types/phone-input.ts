@@ -12,7 +12,7 @@ export class PhoneInput implements Partial<Phone> {
   @Field({ nullable: true })
   mac?: string;
 
-  @Field()
+  @Field({ defaultValue: false })
   skipContacts!: boolean;
 }
 

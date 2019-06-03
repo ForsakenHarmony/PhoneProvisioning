@@ -52,8 +52,7 @@ function download(base64, name) {
 export function Config() {
   const [selectedCompany, setSelectedCompany] = useState("");
 
-  const [{ data, error, fetching }] = useQuery({ query: companies });
-  console.log(data, error, fetching);
+  const [{ data, error, fetching }, refetch] = useQuery({ query: companies });
 
   const [{}, setActive] = useMutation(setActiveCompanyMut);
   const [{}, addC] = useMutation(addCompanyMut);
@@ -62,28 +61,30 @@ export function Config() {
   const [{}, removeC] = useMutation(removeCompanyMut);
 
   const setSelected = useCallback(
-    name => {
-      if (name === selectedCompany) return;
+    id => {
+      if (id === selectedCompany) return;
       setSelectedCompany(selected => {
-        if (name !== selected && name !== "" && name !== "new") {
-          setActive({ id: name }).catch(e => {});
+        if (![selected, "", "new"].includes(id)) {
+          setActive({ id: id }).catch(e => {});
         }
-        return name;
+        return id;
       });
     },
     [selectedCompany]
   );
 
   useEffect(() => {
-    if (!fetching && data && selectedCompany === "") {
+    if (!fetching && data && (selectedCompany === "" || selectedCompany !== "new" && !data.companies.find(c => c.id === selectedCompany))) {
       setSelected((data.companies[0] || {}).id || "new");
     }
   }, [selectedCompany, data, fetching, data]);
 
   const createNew = useCallback(
     async name => {
-      const { data } = await addC({ name });
-      setSelected(data.company.id);
+      const { data: { addCompany } } = await addC({ name });
+
+      setSelected(addCompany.id);
+      refetch({ skipCache: true });
     },
     [selectedCompany]
   );
@@ -95,7 +96,7 @@ export function Config() {
     });
     download(
       btoa(JSON.stringify(data.exportCompany, void 0, 2)),
-      `export-phone.json`
+      `export-phone-${data.exportCompany.name.toLowerCase().replace(/\s/g, '-')}.json`
     );
   }, [selectedCompany]);
 
@@ -115,86 +116,64 @@ export function Config() {
   const removeCompany = useCallback(async () => {
     if (selectedCompany === "new" || selectedCompany === "") return;
     await removeC({ companyId: selectedCompany });
-    setSelected((data.companies[0] || {}).id || "new");
   }, [selectedCompany, data]);
 
   return (
     <div id="app">
-      <div class="column">
-        <header class="navbar">
-          <section class="navbar-section">
-            <a href="#" class="navbar-brand text-bold mr-2">
-              <Text id="phone_provisioning" />
-            </a>
-          </section>
-          <section class="navbar-section">
-            <select
-              class="form-select"
-              value={selectedCompany}
-              onChange={e => setSelectedCompany(e.target.value)}
-            >
-              {!data ? (
-                <option>
-                  <Text id="loading" />
-                </option>
-              ) : (
-                data.companies.map(c => <option value={c.id}>{c.name}</option>)
-              )}
-              <option value={"new"}>
-                <Text id="new_company" />
+      <header class="navbar">
+        <section class="navbar-section">
+          <a href="#" class="navbar-brand text-bold mr-2">
+            <Text id="phone_provisioning" />
+          </a>
+        </section>
+        <section class="navbar-section">
+          <select
+            class="form-select"
+            value={selectedCompany}
+            onChange={e => setSelected(e.target.value)}
+          >
+            {!data ? (
+              <option>
+                <Text id="loading" />
               </option>
-            </select>
-            <Localizer>
-              <button
-                class="btn btn-primary btn-action tooltip tooltip-bottom"
-                data-tooltip={<Text id="export" />}
-                onClick={exportCompany}
-              >
-                <Download />
-              </button>
-            </Localizer>
-            <Localizer>
-              <button
-                class="btn btn-primary btn-action tooltip tooltip-bottom"
-                data-tooltip={<Text id="import" />}
-                onClick={importCompany}
-              >
-                <Upload />
-              </button>
-            </Localizer>
-            <Localizer>
-              <button
-                class="btn btn-primary btn-action tooltip tooltip-bottom"
-                data-tooltip={<Text id="remove_company" />}
-                onClick={removeCompany}
-              >
-                <Trash />
-              </button>
-            </Localizer>
-          </section>
-          <section class="navbar-section" />
-        </header>
-      </div>
-      {fetching ? (
-        <div class="container">
-          <div class="card">
-            <div class="card-body">
-              <div class="loading loading-lg" />
-            </div>
-          </div>
-        </div>
-      ) : error ? (
-        <div class="container">
-          <div class="card">
-            <div class="card-body">
-              <Text id="error" />
-              <p>{JSON.stringify(error)}</p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <Company id={selectedCompany} addCompany={createNew} />
-      )}
+            ) : (
+              data.companies.map(c => <option value={c.id}>{c.name}</option>)
+            )}
+            <option value={"new"}>
+              <Text id="new_company" />
+            </option>
+          </select>
+          <Localizer>
+            <button
+              class="btn btn-primary btn-action tooltip tooltip-bottom"
+              data-tooltip={<Text id="export" />}
+              onClick={exportCompany}
+            >
+              <Download />
+            </button>
+          </Localizer>
+          <Localizer>
+            <button
+              class="btn btn-primary btn-action tooltip tooltip-bottom"
+              data-tooltip={<Text id="import" />}
+              onClick={importCompany}
+            >
+              <Upload />
+            </button>
+          </Localizer>
+          <Localizer>
+            <button
+              class="btn btn-primary btn-action tooltip tooltip-bottom"
+              data-tooltip={<Text id="remove_company" />}
+              onClick={removeCompany}
+            >
+              <Trash />
+            </button>
+          </Localizer>
+        </section>
+        <section class="navbar-section" />
+      </header>
+      <Company id={selectedCompany} addCompany={createNew} />
     </div>
   );
 }

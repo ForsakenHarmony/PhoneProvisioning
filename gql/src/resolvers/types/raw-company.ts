@@ -63,6 +63,9 @@ export class RawPhone {
   @Field({ nullable: true })
   mac?: string;
 
+  @Field({ defaultValue: false })
+  skipContacts!: boolean;
+
   @Field(type => [RawSoftkey])
   softkeys!: RawSoftkey[];
 

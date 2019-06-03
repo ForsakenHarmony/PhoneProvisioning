@@ -15,4 +15,8 @@ import { App } from "./components/app";
 //
 // init();
 
+window.addEventListener("unhandledrejection", event => {
+  console.warn(`UNHANDLED PROMISE REJECTION: ${event.reason}`);
+});
+
 export default App;

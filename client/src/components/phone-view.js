@@ -12,7 +12,7 @@ export const PhoneView = ({
   handle,
   ...props
 }) => (
-  <tr key={id} id={`phone.${id}`} {...props} style={over ? "opacity: .5" : ""}>
+  <tr key={id} id={`phone.${id}`} style={over ? "opacity: .5" : ""} {...props}>
     <td>{!last && handle}</td>
     <td>
       <input

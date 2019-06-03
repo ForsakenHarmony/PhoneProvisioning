@@ -26,6 +26,7 @@
     "noImplicitThis": true,
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
+    "incremental": true,
 
     "baseUrl": ".",
     "paths": { "*": ["typings/*"] }

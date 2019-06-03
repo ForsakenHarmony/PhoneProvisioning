@@ -42,14 +42,14 @@ export function CompanyPhones({ company }) {
   useEffect(async () => {
     if (!phoneState.name || !phoneState.number || addFetching) return;
     try {
-      await addPhoneMut({
-        companyId: company.id,
-        phone: phoneState
-      });
       setState({
         name: null,
         mac: null,
         number: null
+      });
+      await addPhoneMut({
+        companyId: company.id,
+        phone: phoneState
       });
       setError(null);
     } catch (e) {
@@ -114,7 +114,7 @@ export function CompanyPhones({ company }) {
   }, [transferMut, company]);
 
   return (
-    <div class="card card-phones">
+    <div class="card card-phones" id="list">
       <div class="card-header">
         <div class="card-title h5">
           <Text id="phones" />

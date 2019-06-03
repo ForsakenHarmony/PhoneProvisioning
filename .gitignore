@@ -1,0 +1,13 @@
+.idea
+.code
+
+gql/public
+gql/dist
+
+*/node_modules
+
+*.log
+*.exe
+*.sqlite
+
+node_sqlite3.node

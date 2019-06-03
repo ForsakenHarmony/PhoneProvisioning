@@ -35,60 +35,58 @@ export function Company({ id, addCompany }) {
     e => {
       e.preventDefault();
       setLoading(true);
-      addCompany(newName).then(() => setLoading(false), () => {});
+      addCompany(newName).then(() => setLoading(false));
     },
     [newName]
   );
 
   return (
-    <div class="container">
-      <div>
-        {fetching ? (
+    <>
+      {fetching ? (
+        <div class="card" id="list">
+          <div class="card-body">
+            <div class="loading loading-lg" />
+          </div>
+        </div>
+      ) : !data || !data.company ? (
+        <form onSubmit={createNew} id="list">
           <div class="card">
+            <div class="card-header">
+              <div class="card-title h5">
+                <Text id="new_company" />
+              </div>
+            </div>
             <div class="card-body">
-              <div class="loading loading-lg" />
+              <div class="form-group">
+                <label class="form-label" for="newName">
+                  <Text id="name" />
+                </label>
+                <Localizer>
+                  <input
+                    required
+                    class="form-input"
+                    type="text"
+                    id="newName"
+                    placeholder={<Text id="name" />}
+                    value={newName}
+                    onChange={e => setNewName(e.target.value)}
+                  />
+                </Localizer>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class={clsx("btn btn-primary", { loading: loading })}>
+                <Text id="create_company" />
+              </button>
             </div>
           </div>
-        ) : !data || !data.company ? (
-          <form onSubmit={createNew}>
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title h5">
-                  <Text id="new_company" />
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="form-group">
-                  <label class="form-label" for="newName">
-                    <Text id="name" />
-                  </label>
-                  <Localizer>
-                    <input
-                      required
-                      class="form-input"
-                      type="text"
-                      id="newName"
-                      placeholder={<Text id="name" />}
-                      value={newName}
-                      onChange={e => setNewName(e.target.value)}
-                    />
-                  </Localizer>
-                </div>
-              </div>
-              <div class="card-footer">
-                <button class={clsx("btn btn-primary", { loading: loading })}>
-                  <Text id="create_company" />
-                </button>
-              </div>
-            </div>
-          </form>
-        ) : (
-          <CompanyPhones company={data.company} />
-        )}
-      </div>
-      <div class="phones">
+        </form>
+      ) : (
+        <CompanyPhones company={data.company} />
+      )}
+      <div id="phones">
         {data && data.company ? (
-          data.company.phones.map((p, id) => (
+          data.company.phones.filter(p => p.mac).map((p, id) => (
             <div bp="margin-left margin-right 6">
               <PhoneConfig phone={p} id={id} company={data.company} />
             </div>
@@ -104,7 +102,7 @@ export function Company({ id, addCompany }) {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 

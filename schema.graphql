@@ -6,14 +6,16 @@
 type Company {
   id: ID!
   name: String!
-  phones: [Phone!]!
+  phones: [Phone!]
 }
 
 input CompanyInput {
   name: String!
 }
 
-# The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
 scalar DateTime
 
 type Mutation {
@@ -56,7 +58,7 @@ input PhoneInput {
   name: String!
   number: String!
   mac: String
-  skipContacts: Boolean!
+  skipContacts: Boolean = false
 }
 
 type PhoneNotification {
@@ -93,6 +95,7 @@ type RawPhone {
   name: String!
   number: String!
   mac: String
+  skipContacts: Boolean
   softkeys: [RawSoftkey!]!
   topSoftkeys: [RawTopSoftkey!]!
 }
@@ -102,6 +105,7 @@ input RawPhoneInput {
   name: String!
   number: String!
   mac: String
+  skipContacts: Boolean = false
   softkeys: [RawSoftkeyInput!]!
   topSoftkeys: [RawTopSoftkeyInput!]!
 }

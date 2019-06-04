@@ -133,7 +133,7 @@ export function CompanyPhones({ company }) {
         {/*<form id="new" onSubmit={this.submitPhone.bind(null, "new")}>*/}
         {/*  <button style={{ display: "none" }} />*/}
         {/*</form>*/}
-        <table class="table" style="position: relative">
+        <table class="table" style={{"position": "relative"}}>
           <thead>
             <tr>
               <th />

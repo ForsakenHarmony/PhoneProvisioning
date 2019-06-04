@@ -2,16 +2,14 @@ const webpack = require('webpack');
 
 export default (config, env) => {
   // console.log(config.module);
-  const babel = config.module.rules[0];
-  const babelConf = babel.options;
+  // const babel = config.module.rules[0];
+  // const babelConf = babel.options;
 
-  config.plugins.push(
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify({NODE_ENV: env.isProd ? 'production' : 'development'}),
-    }),
-  );
-
-  babelConf.plugins[3] = [babelConf.plugins[3], { loose: true }];
+  // config.plugins.push(
+  //   new webpack.DefinePlugin({
+  //     'process.env': JSON.stringify({NODE_ENV: env.isProd ? 'production' : 'development'}),
+  //   }),
+  // );
 
   if (!env.isProd) {
     config.devServer.proxy = {

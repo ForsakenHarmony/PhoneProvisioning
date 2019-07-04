@@ -49,6 +49,25 @@ function download(base64, name) {
   a.click();
 }
 
+function removeTypename(thing) {
+  if (Array.isArray(thing))
+    return thing.map(removeTypename);
+
+  if (typeof thing !== 'object')
+    return thing;
+
+  const { __typename, ...rest } = thing;
+  const keys = Object.keys(rest);
+
+  for (let i = 0; i < keys.length; i++) {
+    const prop = keys[i];
+    const value = rest[prop];
+    rest[prop] = removeTypename(value);
+  }
+
+  return rest;
+}
+
 export function Config() {
   const [selectedCompany, setSelectedCompany] = useState("");
 
@@ -105,7 +124,7 @@ export function Config() {
     try {
       const file = files[0];
       const text = await new Response(file).text();
-      const company = JSON.parse(text);
+      const company = removeTypename(JSON.parse(text));
       const { data } = await importC({ company });
       setSelected(data.importCompany.id);
     } catch (e) {

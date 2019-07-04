@@ -4,11 +4,9 @@ import { InjectRepository } from "typeorm-typedi-extensions";
 import { Repository } from "typeorm";
 import { CompanyInput } from "./types/company-input";
 import { Container } from "typedi";
-import { PhoneApiProvider } from "../api/phone-api";
 import { Phone } from "../entities/phone";
 import { RawCompany } from "./types/raw-company";
-import { PubSub } from "graphql-subscriptions";
-import { PhoneMessages } from "../constants";
+import { PhoneResolver } from "./phoneResolver";
 
 @Resolver(Company)
 export class CompanyResolver {
@@ -50,19 +48,12 @@ export class CompanyResolver {
         company: {
           id: companyId
         }
-      },
-      relations: [ "softkeys", "topSoftkeys" ]
+      }
     });
 
-    const provider = Container.get(PhoneApiProvider);
-    const pubSub = Container.get<PubSub>("PB");
-    const publish = pubSub.publish.bind(pubSub, PhoneMessages);
+    const phoneResolver = Container.get(PhoneResolver);
 
-    await Promise.all(phones.map(async phone => {
-      const api = provider.getPhoneApi(phone, publish);
-      await api.updateSoftkeys(await phone.softkeys);
-      await api.updateTopSoftkeys(await phone.topSoftkeys, phone.skipContacts ? [] : phones.filter(p => p.id !== phone.id));
-    }));
+    await Promise.all(phones.map(async phone => phoneResolver.transferConfigToPhone(phone.id)));
 
     return true;
   }
@@ -102,6 +93,6 @@ export class CompanyResolver {
   @Mutation(returns => Company)
   async importCompany(@Arg("company", type => RawCompany) rawCompany: RawCompany) {
     const company = this.companyRepo.create(rawCompany);
-    return await this.companyRepo.save(company);
+    return this.companyRepo.save(company);
   }
 }

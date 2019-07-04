@@ -1,15 +1,25 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import { Lazy } from "../helpers";
 import { Phone } from "./phone";
 import { SoftkeyTypes } from "../constants";
 
-@Entity()
 @ObjectType()
+@Entity({
+  orderBy: {
+    idx: "ASC"
+  }
+})
 export class Softkey {
   @Field(type => ID)
   @PrimaryGeneratedColumn("uuid")
   readonly id!: string;
+
+  @Field(type => Int)
+  @Column({
+    generated: "rowid"
+  })
+  idx!: number;
 
   @Field(type => SoftkeyTypes)
   @Column({ enum: Object.values(SoftkeyTypes) })

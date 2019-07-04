@@ -100,17 +100,11 @@ export class PhoneResolver {
       } else if (phone.id === to) {
         passedTo = true;
         fromPhone.idx = phone.idx;
-        if (!passedFrom)
-          phone.idx++;
-        else
-          phone.idx--;
+        if (!passedFrom) phone.idx++;
+        else phone.idx--;
       } else {
-        if (passedFrom) {
-          phone.idx--;
-        }
-        if (passedTo) {
-          phone.idx++;
-        }
+        if (passedFrom) phone.idx--;
+        if (passedTo) phone.idx++;
       }
       i++;
     }

@@ -11,6 +11,12 @@ export class TopSoftkey {
   @PrimaryGeneratedColumn("uuid")
   readonly id!: string;
 
+  // @Field(type => Int)
+  // @Column({
+  //   generated: "rowid"
+  // })
+  // idx!: number;
+
   @Field(type => TopSoftkeyTypes)
   @Column({ enum: TopSoftkeyTypes })
   type!: TopSoftkeyTypes;

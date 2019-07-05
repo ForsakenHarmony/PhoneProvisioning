@@ -86,11 +86,13 @@ export function Company({ id, addCompany }) {
       )}
       <div id="phones">
         {data && data.company ? (
-          data.company.phones.filter(p => p.mac).map((p, id) => (
-            <div bp="margin-left margin-right 6">
-              <PhoneConfig phone={p} id={id} company={data.company} />
-            </div>
-          ))
+          data.company.phones
+            .filter(p => p.mac)
+            .map((p, id) => (
+              <div bp="margin-right">
+                <PhoneConfig phone={p} id={id} company={data.company} />
+              </div>
+            ))
         ) : (
           <div class="empty non-ideal">
             <div class="empty-icon">

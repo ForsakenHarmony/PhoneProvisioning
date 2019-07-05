@@ -12,9 +12,14 @@ export const PhoneView = ({
   handle,
   ...props
 }) => (
-  <tr key={id} id={`phone.${id}`} style={over ? {"opacity": ".5"} : {}} {...props}>
+  <tr
+    key={id}
+    id={`phone.${id}`}
+    style={over ? { opacity: ".5" } : {}}
+    {...props}
+  >
     <td>{!last && handle}</td>
-    <td>
+    <td class="table-name-input">
       <input
         class="form-input"
         type="text"
@@ -28,7 +33,7 @@ export const PhoneView = ({
         placeholder="Name"
       />
     </td>
-    <td>
+    <td class="table-number-input">
       <input
         class="form-input"
         type="number"
@@ -43,7 +48,7 @@ export const PhoneView = ({
         placeholder="42"
       />
     </td>
-    <td>
+    <td class="table-mac-input">
       <input
         class="form-input"
         type="text"

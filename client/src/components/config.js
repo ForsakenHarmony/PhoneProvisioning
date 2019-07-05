@@ -39,22 +39,24 @@ function useFilePicker(cb) {
   // return open;
 }
 
-function download(base64, name) {
+function download(data, name) {
+  const blob = new Blob([data], {
+    type: "application/json",
+    endings: "transparent"
+  });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.setAttribute(
-    "href",
-    `data:application/json;charset=utf-8;base64,${base64}`
-  );
-  a.setAttribute("download", name);
+  a.href = url;
+  a.download = name;
+  a.rel = "noopener";
   a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 30 * 1000);
 }
 
 function removeTypename(thing) {
-  if (Array.isArray(thing))
-    return thing.map(removeTypename);
+  if (Array.isArray(thing)) return thing.map(removeTypename);
 
-  if (typeof thing !== 'object')
-    return thing;
+  if (typeof thing !== "object") return thing;
 
   const { __typename, ...rest } = thing;
   const keys = Object.keys(rest);
@@ -93,14 +95,22 @@ export function Config() {
   );
 
   useEffect(() => {
-    if (!fetching && data && (selectedCompany === "" || selectedCompany !== "new" && !data.companies.find(c => c.id === selectedCompany))) {
+    if (
+      !fetching &&
+      data &&
+      (selectedCompany === "" ||
+        (selectedCompany !== "new" &&
+          !data.companies.find(c => c.id === selectedCompany)))
+    ) {
       setSelected((data.companies[0] || {}).id || "new");
     }
   }, [selectedCompany, data, fetching, data]);
 
   const createNew = useCallback(
     async name => {
-      const { data: { addCompany } } = await addC({ name });
+      const {
+        data: { addCompany }
+      } = await addC({ name });
 
       setSelected(addCompany.id);
       refetch({ skipCache: true });
@@ -114,8 +124,10 @@ export function Config() {
       companyId: selectedCompany
     });
     download(
-      btoa(JSON.stringify(data.exportCompany, void 0, 2)),
-      `export-phone-${data.exportCompany.name.toLowerCase().replace(/\s/g, '-')}.json`
+      JSON.stringify(data.exportCompany, void 0, 2),
+      `export-phone-${data.exportCompany.name
+        .toLowerCase()
+        .replace(/\s/g, "-")}.json`
     );
   }, [selectedCompany]);
 

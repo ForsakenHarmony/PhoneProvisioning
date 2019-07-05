@@ -16,9 +16,7 @@ export class Softkey {
   readonly id!: string;
 
   @Field(type => Int)
-  @Column({
-    generated: "rowid"
-  })
+  @Column({ default: 0 })
   idx!: number;
 
   @Field(type => SoftkeyTypes)
@@ -58,6 +56,6 @@ export class Softkey {
   busy!: boolean;
 
   @Field(type => Phone)
-  @ManyToOne(type => Phone, { lazy: true, onDelete: "CASCADE" })
+  @ManyToOne(type => Phone, { lazy: true, onDelete: "CASCADE", nullable: false })
   phone!: Lazy<Phone>;
 }

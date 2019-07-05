@@ -21,6 +21,8 @@ import {
 
 import { useMutation } from "@pql/boost";
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { PhoneView } from "./phone-view";
+import { DnD } from "./dnd";
 
 function useManagedMutation(
   statusSetter,
@@ -192,26 +194,46 @@ export function PhoneConfig({ phone }) {
           </li>
         </ul>
       </nav>
-      <div class="panel-body">
-        {activeView === "top_softkeys"
-          ? phone.topSoftkeys.map(softkey => (
-              <SoftkeyConfig
-                softkey={softkey}
-                set={updateTopSoftkey.bind(null, softkey.id)}
-                remove={removeTopSoftkey}
-                isTop={true}
-                loading={settingSoftkey}
-              />
-            ))
-          : phone.softkeys.map(softkey => (
-              <SoftkeyConfig
-                softkey={softkey}
-                set={updateSoftkey.bind(null, softkey.id)}
-                remove={removeSoftkey}
-                loading={settingSoftkey}
-              />
-            ))}
-      </div>
+      <DnD
+        handle={({ ...props }) => (
+          <button
+            class={clsx("btn btn-action", { settingSoftkey })}
+            type="button"
+            {...props}
+          >
+            <i class="icon icon-resize-vert" />
+          </button>
+        )}
+        container={({ children, ...props }) => (
+          <div class="panel-body" {...props}>
+            {children}
+          </div>
+        )}
+        item={({ data, ...props }) =>
+          activeView === "top_softkeys" ? (
+            <SoftkeyConfig
+              softkey={data}
+              set={updateTopSoftkey.bind(null, data.id)}
+              remove={removeTopSoftkey}
+              loading={settingSoftkey}
+              isTop
+              {...props}
+            />
+          ) : (
+            <SoftkeyConfig
+              softkey={data}
+              set={updateSoftkey.bind(null, data.id)}
+              remove={removeSoftkey}
+              loading={settingSoftkey}
+              {...props}
+            />
+          )
+        }
+        items={
+          activeView === "top_softkeys" ? phone.topSoftkeys : phone.softkeys
+        }
+        onMove={console.log}
+      />
       <div class="panel-footer">
         <div class="btn-group btn-group-block popover popover-with-trigger">
           <Localizer>

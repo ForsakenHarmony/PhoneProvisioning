@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import { Lazy } from "../helpers";
 import { Phone } from "./phone";
 import { TopSoftkeyTypes } from "../constants";
@@ -11,11 +11,9 @@ export class TopSoftkey {
   @PrimaryGeneratedColumn("uuid")
   readonly id!: string;
 
-  // @Field(type => Int)
-  // @Column({
-  //   generated: "rowid"
-  // })
-  // idx!: number;
+  @Field(type => Int)
+  @Column({ default: 0 })
+  idx!: number;
 
   @Field(type => TopSoftkeyTypes)
   @Column({ enum: TopSoftkeyTypes })

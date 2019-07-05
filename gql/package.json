@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "tsnd --respawn .",
+    "dev": "tsnd  --no-notify --respawn .",
     "debug": "tsnd --respawn --inspect .",
     "build": "tsc && pkg --public -t node10-win-x64 -o ../PhoneProvisioning_1.0.0 .",
     "build:ts": "tsc",

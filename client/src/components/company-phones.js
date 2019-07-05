@@ -10,7 +10,13 @@ import {
 } from "../gql/index.gql";
 import clsx from "clsx";
 import { useMutation } from "@pql/boost";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "preact/hooks";
 
 export function CompanyPhones({ company }) {
   const [{ fetching: addFetching }, addPhoneMut] = useMutation(addPhone);
@@ -41,7 +47,8 @@ export function CompanyPhones({ company }) {
 
   const [skipThing, setSkipThing] = useState(false);
   useEffect(async () => {
-    if (!phoneState.name || !phoneState.number || addFetching || skipThing) return;
+    if (!phoneState.name || !phoneState.number || addFetching || skipThing)
+      return;
     setSkipThing(true);
     try {
       await addPhoneMut({
@@ -67,23 +74,47 @@ export function CompanyPhones({ company }) {
   console.log("fn", lastLen.current, company.phones.length, focused.current);
   useEffect(() => {
     if (!table.current) return;
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(mutations => {
       console.log("mutation", mutations);
     });
-    observer.observe(table.current, { childList: true, subtree: true, attributes: true });
+    observer.observe(table.current, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
     return observer.disconnect.bind(observer);
   }, [table.current]);
   useEffect(() => {
-    console.log("effect", lastLen.current, company.phones.length, focused.current);
+    console.log(
+      "effect",
+      lastLen.current,
+      company.phones.length,
+      focused.current
+    );
   }, [focused.current, company.phones.length]);
   useLayoutEffect(() => {
-    console.log("layout", lastLen.current, company.phones.length, focused.current);
+    console.log(
+      "layout",
+      lastLen.current,
+      company.phones.length,
+      focused.current
+    );
     const currentPhones = company.phones.length;
     const lastPhones = lastLen.current;
     const focusedEl = focused.current;
 
-    if (currentPhones > lastPhones && focusedEl && focusedEl.id.endsWith('new')) {
-      document.getElementById(`phone.${focusedEl.id.split('.')[1]}.${company.phones[company.phones.length - 1].id}`).focus()
+    if (
+      currentPhones > lastPhones &&
+      focusedEl &&
+      focusedEl.id.endsWith("new")
+    ) {
+      document
+        .getElementById(
+          `phone.${focusedEl.id.split(".")[1]}.${
+            company.phones[company.phones.length - 1].id
+          }`
+        )
+        .focus();
     }
 
     lastLen.current = company.phones.length;
@@ -165,7 +196,7 @@ export function CompanyPhones({ company }) {
         {/*<form id="new" onSubmit={this.submitPhone.bind(null, "new")}>*/}
         {/*  <button style={{ display: "none" }} />*/}
         {/*</form>*/}
-        <table class="table" style={{"position": "relative"}} ref={table}>
+        <table class="table" style={{ position: "relative" }} ref={table}>
           <thead>
             <tr>
               <th />
@@ -201,7 +232,7 @@ export function CompanyPhones({ company }) {
                   id="new"
                   phone={phoneState}
                   update={updateState}
-                  focus={e => focused.current = e.target}
+                  focus={e => (focused.current = e.target)}
                   last={true}
                 />
               </tbody>
@@ -212,7 +243,7 @@ export function CompanyPhones({ company }) {
                 id={data.id}
                 remove={remove.bind(null, data.id)}
                 update={update.bind(null, data.id)}
-                focus={e => focused.current = e.target}
+                focus={e => (focused.current = e.target)}
                 {...props}
               />
             )}

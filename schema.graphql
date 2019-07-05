@@ -19,11 +19,6 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 scalar DateTime
 
 type Mutation {
-  addCompany(company: CompanyInput!): Company!
-  removeCompany(companyId: ID!): Company!
-  transferConfigToPhones(companyId: ID!): Boolean!
-  exportCompany(companyId: ID!): RawCompany!
-  importCompany(company: RawCompanyInput!): Company!
   setActiveCompany(companyId: ID!): Boolean!
   addPhone(phone: PhoneInput!, companyId: ID!): Phone!
   movePhones(to: ID!, from: ID!): [Phone!]!
@@ -39,6 +34,11 @@ type Mutation {
   resetPhone(phoneId: ID!): Boolean!
   importConfigFromPhone(id: ID!): Phone!
   transferConfigToPhone(phoneId: ID!): Boolean!
+  addCompany(company: CompanyInput!): Company!
+  removeCompany(companyId: ID!): Company!
+  transferConfigToPhones(companyId: ID!): Boolean!
+  exportCompany(companyId: ID!): RawCompany!
+  importCompany(company: RawCompanyInput!): Company!
 }
 
 type Phone {
@@ -75,9 +75,9 @@ enum PhoneStatus {
 }
 
 type Query {
+  checkPostList(phoneId: ID!): Boolean!
   companies: [Company!]!
   company(companyId: ID!): Company
-  checkPostList(phoneId: ID!): Boolean!
 }
 
 type RawCompany {
@@ -150,6 +150,7 @@ input RawTopSoftkeyInput {
 
 type Softkey {
   id: ID!
+  idx: Int!
   type: SoftkeyTypes!
   label: String!
   value: String!
@@ -208,6 +209,7 @@ type Subscription {
 
 type TopSoftkey {
   id: ID!
+  idx: Int!
   type: TopSoftkeyTypes!
   label: String!
   value: String!

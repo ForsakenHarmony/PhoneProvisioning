@@ -22,11 +22,11 @@ body {
   height: 100%;
   display: grid;
   grid-gap: 1rem;
-  grid-template-columns: minmax(500px, 2fr) 3fr;
+  grid-template-columns: 650px auto;
   grid-template-rows: 60px auto;
   grid-template-areas:
-          "header header"
-          "list phones";
+    "header header"
+    "list phones";
 }
 
 #app > header {
@@ -47,6 +47,27 @@ body {
   flex-wrap: nowrap;
 }
 
+.table td,
+.table th {
+  padding: 0.2rem;
+}
+
+.table-name-input,
+.table-name-input > * {
+  max-width: 120px;
+}
+
+.table-number-input,
+.table-number-input > * {
+  max-width: 100px;
+}
+
+.table-mac-input,
+.table-mac-input > * {
+  max-width: 170px;
+  font-family: Menlo, Monaco, Consolas, Courier New, monospace;
+}
+
 /*.card {*/
 /*  border: 0;*/
 /*  box-shadow: 0 0.25rem 1rem rgba(48, 55, 66, 0.15);*/
@@ -63,7 +84,7 @@ body {
 }
 
 .card-softkey {
-  width: 300px;
+  width: 350px;
 }
 
 /*.card-softkey.panel {*/

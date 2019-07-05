@@ -133,11 +133,14 @@ export const SoftkeyConfig = ({
   set,
   remove,
   isTop = false,
-  loading
+  loading,
+  handle,
+  ...props
 }) => {
   const EnumToVal = isTop ? EnumToTopSoftkey : EnumToSoftkey;
   return (
-    <div class="tile tile-centered">
+    <div class="tile tile-centered" {...props}>
+      {handle}
       <div class="tile-content">
         <div class="tile-title text-bold">
           {softkey.label || <Text id={`softkey.${EnumToVal[softkey.type]}`} />}

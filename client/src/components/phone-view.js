@@ -27,7 +27,7 @@ export const PhoneView = ({
         pattern="[\w ]{2,}"
         // form={id}
         value={phone.name}
-        onChange={update.bind(null, "name")}
+        onBlur={update.bind(null, "name")}
         id={`phone.name.${id}`}
         onFocus={focus}
         placeholder="Name"
@@ -42,7 +42,7 @@ export const PhoneView = ({
         aria-invalid="true"
         // form={id}
         value={phone.number}
-        onChange={update.bind(null, "number")}
+        onBlur={update.bind(null, "number")}
         id={`phone.number.${id}`}
         onFocus={focus}
         placeholder="42"
@@ -55,36 +55,35 @@ export const PhoneView = ({
         pattern="(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}"
         // form={id}
         value={phone.mac}
-        onChange={update.bind(null, "mac")}
+        onBlur={update.bind(null, "mac")}
         id={`phone.mac.${id}`}
         onFocus={focus}
         placeholder="ff:ff:ff:ff:ff:ff"
       />
     </td>
-    <td>
-      {(({ icon, tooltip, intent, ...props }) => (
-        <Localizer>
+    {(({ icon, tooltip, intent, ...props }) => (
+      <Localizer>
+        <td class="tooltip" data-tooltip={<Text id={tooltip} />}>
           <button
             type="button"
             class={clsx({
-              "btn btn-action tooltip": true,
+              "btn btn-action": true,
               [`btn-${intent}`]: true
             })}
-            data-tooltip={<Text id={tooltip} />}
             {...props}
           >
             <i class={clsx({ icon: true, [`icon-${icon}`]: true })} />
           </button>
-        </Localizer>
-      ))(
-        {
-          Nonexistent: { icon: "stop", disabled: true, tooltip: "nonexistent" },
-          Loading: { loading: true, tooltip: "loading" },
-          Online: { icon: "check", intent: "success", tooltip: "online" },
-          Offline: { icon: "cross", intent: "error", tooltip: "offline" }
-        }[phone.status || "Nonexistent"]
-      )}
-    </td>
+        </td>
+      </Localizer>
+    ))(
+      {
+        Nonexistent: { icon: "stop", disabled: true, tooltip: "nonexistent" },
+        Loading: { loading: true, tooltip: "loading" },
+        Online: { icon: "check", intent: "success", tooltip: "online" },
+        Offline: { icon: "cross", intent: "error", tooltip: "offline" }
+      }[phone.status || "Nonexistent"]
+    )}
     <td>
       {!last && (
         <button

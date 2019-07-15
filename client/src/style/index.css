@@ -52,6 +52,10 @@ body {
   padding: 0.2rem;
 }
 
+.table td {
+  text-align: center;
+}
+
 .table-name-input,
 .table-name-input > * {
   max-width: 120px;

@@ -1,5 +1,5 @@
 import { Field, ID, Int, ObjectType } from "type-graphql";
-import { PrimaryGeneratedColumn, Column, Entity, OneToMany, ManyToOne } from "typeorm";
+import { Column, Entity, OneToMany, ManyToOne, PrimaryColumn } from "typeorm";
 import { Matches, MaxLength } from 'class-validator';
 
 import { Lazy } from "../helpers";
@@ -15,7 +15,7 @@ import { Softkey } from "./softkey";
 })
 export class Phone {
   @Field(type => ID)
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryColumn({ generated: "uuid" })
   readonly id!: string;
 
   @Field(type => Int)

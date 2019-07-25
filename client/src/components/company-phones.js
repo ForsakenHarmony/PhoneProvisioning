@@ -17,6 +17,7 @@ import {
   useRef,
   useState
 } from "preact/hooks";
+import genUUID from 'uuid/v4';
 
 export function CompanyPhones({ company }) {
   const [{ fetching: addFetching }, addPhoneMut] = useMutation(addPhone);
@@ -39,6 +40,7 @@ export function CompanyPhones({ company }) {
     updateFetching;
 
   const [phoneState, setState] = useState({
+    id: genUUID(),
     name: null,
     mac: null,
     number: null
@@ -49,16 +51,18 @@ export function CompanyPhones({ company }) {
   useEffect(async () => {
     if (!phoneState.name || !phoneState.number || addFetching || skipThing)
       return;
+    company.phones.push(phoneState);
     setSkipThing(true);
     try {
-      await addPhoneMut({
-        companyId: company.id,
-        phone: phoneState
-      });
       setState({
+        id: genUUID(),
         name: null,
         mac: null,
         number: null
+      });
+      await addPhoneMut({
+        companyId: company.id,
+        phone: phoneState
       });
       setError(null);
     } catch (e) {
@@ -67,58 +71,6 @@ export function CompanyPhones({ company }) {
       setSkipThing(false);
     }
   }, [phoneState, company.id, addFetching, error]);
-
-  const table = useRef();
-  const focused = useRef(null);
-  const lastLen = useRef(company.phones.length);
-  console.log("fn", lastLen.current, company.phones.length, focused.current);
-  useEffect(() => {
-    if (!table.current) return;
-    const observer = new MutationObserver(mutations => {
-      console.log("mutation", mutations);
-    });
-    observer.observe(table.current, {
-      childList: true,
-      subtree: true,
-      attributes: true
-    });
-    return observer.disconnect.bind(observer);
-  }, [table.current]);
-  useEffect(() => {
-    console.log(
-      "effect",
-      lastLen.current,
-      company.phones.length,
-      focused.current
-    );
-  }, [focused.current, company.phones.length]);
-  useLayoutEffect(() => {
-    console.log(
-      "layout",
-      lastLen.current,
-      company.phones.length,
-      focused.current
-    );
-    const currentPhones = company.phones.length;
-    const lastPhones = lastLen.current;
-    const focusedEl = focused.current;
-
-    if (
-      currentPhones > lastPhones &&
-      focusedEl &&
-      focusedEl.id.endsWith("new")
-    ) {
-      document
-        .getElementById(
-          `phone.${focusedEl.id.split(".")[1]}.${
-            company.phones[company.phones.length - 1].id
-          }`
-        )
-        .focus();
-    }
-
-    lastLen.current = company.phones.length;
-  }, [focused.current, company.phones.length]);
 
   const updateState = useCallback(
     (field, e) => {
@@ -157,13 +109,25 @@ export function CompanyPhones({ company }) {
   );
 
   const move = useCallback(
-    (from, to) => {
-      movePhonesMut({
-        from,
-        to
-      })
-        .then(() => setError(null))
-        .catch(e => setError(e));
+    async (from, to) => {
+      const prev = company.phones;
+      try {
+        const next = company.phones.slice();
+        const movedIndex = next.findIndex(p => p.id === from);
+        const toIndex = next.findIndex(p => p.id === to);
+        const moved = next.splice(movedIndex, 1)[0];
+        next.splice(toIndex, 0, moved);
+        company.phones = next;
+
+        await movePhonesMut({
+          from,
+          to
+        });
+        setError(null);
+      } catch (e) {
+        setError(e);
+        company.phones = prev;
+      }
     },
     [movePhonesMut]
   );
@@ -185,18 +149,7 @@ export function CompanyPhones({ company }) {
         </div>
       </div>
       <div class="card-body">
-        {/*{company.phones.map(phone => (*/}
-        {/*  <form*/}
-        {/*    id={phone.id}*/}
-        {/*    onSubmit={this.submitPhone.bind(null, phone.id)}*/}
-        {/*  >*/}
-        {/*    <button style={{ display: "none" }} />*/}
-        {/*  </form>*/}
-        {/*))}*/}
-        {/*<form id="new" onSubmit={this.submitPhone.bind(null, "new")}>*/}
-        {/*  <button style={{ display: "none" }} />*/}
-        {/*</form>*/}
-        <table class="table" style={{ position: "relative" }} ref={table}>
+        <table class="table" style={{ position: "relative" }}>
           <thead>
             <tr>
               <th />
@@ -229,11 +182,10 @@ export function CompanyPhones({ company }) {
               <tbody {...props}>
                 {children}
                 <PhoneView
-                  id="new"
                   phone={phoneState}
+                  id={phoneState.id}
+                  key={phoneState.id}
                   update={updateState}
-                  focus={e => (focused.current = e.target)}
-                  last={true}
                 />
               </tbody>
             )}
@@ -243,7 +195,6 @@ export function CompanyPhones({ company }) {
                 id={data.id}
                 remove={remove.bind(null, data.id)}
                 update={update.bind(null, data.id)}
-                focus={e => (focused.current = e.target)}
                 {...props}
               />
             )}

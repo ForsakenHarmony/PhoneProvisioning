@@ -4,6 +4,9 @@ import { Phone } from "../../entities/phone";
 @InputType()
 export class PhoneInput implements Partial<Phone> {
   @Field()
+  id!: string;
+
+  @Field()
   name!: string;
 
   @Field()

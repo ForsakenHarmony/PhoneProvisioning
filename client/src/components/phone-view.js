@@ -8,6 +8,7 @@ export const PhoneView = ({
   update,
   last = false,
   focus = () => {},
+  created = () => {},
   over,
   handle,
   ...props
@@ -18,7 +19,7 @@ export const PhoneView = ({
     style={over ? { opacity: ".5" } : {}}
     {...props}
   >
-    <td>{!last && handle}</td>
+    <td>{remove && handle}</td>
     <td class="table-name-input">
       <input
         class="form-input"
@@ -30,6 +31,7 @@ export const PhoneView = ({
         onBlur={update.bind(null, "name")}
         id={`phone.name.${id}`}
         onFocus={focus}
+        ref={created}
         placeholder="Name"
       />
     </td>
@@ -45,6 +47,7 @@ export const PhoneView = ({
         onBlur={update.bind(null, "number")}
         id={`phone.number.${id}`}
         onFocus={focus}
+        ref={created}
         placeholder="42"
       />
     </td>
@@ -58,6 +61,7 @@ export const PhoneView = ({
         onBlur={update.bind(null, "mac")}
         id={`phone.mac.${id}`}
         onFocus={focus}
+        ref={created}
         placeholder="ff:ff:ff:ff:ff:ff"
       />
     </td>
@@ -85,7 +89,7 @@ export const PhoneView = ({
       }[phone.status || "Nonexistent"]
     )}
     <td>
-      {!last && (
+      {remove && (
         <button
           class="btn btn-action"
           type="button"

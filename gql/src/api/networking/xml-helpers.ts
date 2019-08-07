@@ -3,19 +3,23 @@ import { Softkey } from "../../entities/softkey";
 import { TopSoftkeyTypes } from "../../constants";
 
 interface PartialTopSoftkey extends Partial<TopSoftkey> {
-  type: TopSoftkeyTypes,
-  label: string,
-  value: string
+  type: TopSoftkeyTypes;
+  label: string;
+  value: string;
 }
 
-export function genTopSoftkeyXml(softkeys: PartialTopSoftkey[], companyPhoneBook: PartialTopSoftkey[]) {
+export function genTopSoftkeyXml(
+  softkeys: PartialTopSoftkey[],
+  companyPhoneBook: PartialTopSoftkey[]
+) {
   const obj = {
     ...Array.from({ length: 20 }, (v, i) => i + 1)
       .map(n => ({
         [`topsoftkey${n} type`]: ""
       }))
       .reduce((acc, val) => Object.assign(acc, val), {}),
-    ...softkeys.concat(companyPhoneBook)
+    ...softkeys
+      .concat(companyPhoneBook)
       .map((key, i) => {
         const n = i + 1;
         return {
@@ -55,13 +59,15 @@ export function genSoftkeyXml(softkeys: Softkey[]) {
 }
 
 export function genConfigXml(obj: { [key: string]: string }) {
-  const items = Object.entries(obj).map(
-    ([k, v]) => `<ConfigurationItem><Parameter>${k}</Parameter><Value>${v}</Value></ConfigurationItem>`
-  ).join("");
+  const items = Object.entries(obj)
+    .map(
+      ([k, v]) =>
+        `<ConfigurationItem><Parameter>${k}</Parameter><Value>${v}</Value></ConfigurationItem>`
+    )
+    .join("");
 
   return `xml=<AastraIPPhoneConfiguration setType="local">${items}</AastraIPPhoneConfiguration>`;
 }
-
 
 // function config_to_xml(phone, list = [], offset = 0) {
 //

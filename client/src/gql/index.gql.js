@@ -229,6 +229,28 @@ export const updateSoftkey = gql`
   }
 `;
 
+export const moveSoftkey = gql`
+  mutation moveSoftkey($from: ID!, $to: ID!) {
+    moveSoftkey(from: $from, to: $to) {
+      id
+      phone {
+        id
+      }
+    }
+  }
+`;
+
+export const moveTopSoftkey = gql`
+  mutation moveTopSoftkey($from: ID!, $to: ID!) {
+    moveTopSoftkey(from: $from, to: $to) {
+      id
+      phone {
+        id
+      }
+    }
+  }
+`;
+
 export const transferConfig = gql`
   mutation transferConfig($phoneId: ID!) {
     transferConfigToPhone(phoneId: $phoneId)

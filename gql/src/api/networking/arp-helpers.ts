@@ -2,22 +2,28 @@ import { getLocalIps } from "./ip-helper";
 
 const { exec } = require("child_process");
 const { promisify } = require("util");
-const execProm: (args: string) => Promise<{ stdout: string, stderr: string }> = promisify(exec);
+const execProm: (
+  args: string
+) => Promise<{ stdout: string; stderr: string }> = promisify(exec);
 
 // const ifaceRegex = /Interface: ([\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})/;
 const entryRegex = /([\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}) ((?:[0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}) (\w+)/;
 
 interface ArpMap {
   [mac: string]: {
-    mac: string,
-    ip: string,
-    type: string,
-  }
+    mac: string;
+    ip: string;
+    type: string;
+  };
 }
 
 async function execAndParseArp() {
   const { stdout } = await execProm("arp -a");
-  const lines = stdout.split(/[\r\n]+/g).map(s => s.trim()).map(s => s.replace(/\s{2,}/g, " ")).filter(Boolean);
+  const lines = stdout
+    .split(/[\r\n]+/g)
+    .map(s => s.trim())
+    .map(s => s.replace(/\s{2,}/g, " "))
+    .filter(Boolean);
   return lines.reduce<ArpMap>((map, line) => {
     const entry = entryRegex.exec(line);
 
@@ -26,7 +32,9 @@ async function execAndParseArp() {
       const mac = entry[2].replace(/-/g, ":");
       const type = entry[3];
       map[mac.toLowerCase()] = {
-        ip, mac, type
+        ip,
+        mac,
+        type
       };
     }
 
@@ -37,15 +45,19 @@ async function execAndParseArp() {
 async function ping(ip: string) {
   console.log("ping", ip);
   try {
-    await execProm(`ping -4 -w 100 -n 1 ${ip}`)
+    await execProm(`ping -4 -w 100 -n 1 ${ip}`);
   } catch (e) {}
 }
 
-async function executor<T, R>(input: T[], creator: (val: T) => Promise<R>, maxRunning: number): Promise<R[]> {
+async function executor<T, R>(
+  input: T[],
+  creator: (val: T) => Promise<R>,
+  maxRunning: number
+): Promise<R[]> {
   const queue = input;
   const running: {
-    id: number,
-    prom: Promise<void>,
+    id: number;
+    prom: Promise<void>;
   }[] = [];
   const results: R[] = [];
   let i = 0;
@@ -59,7 +71,7 @@ async function executor<T, R>(input: T[], creator: (val: T) => Promise<R>, maxRu
         prom: creator(val!).then(res => {
           results.push(res);
           running.splice(running.findIndex(run => run.id === id), 1);
-        }),
+        })
       });
     }
     await Promise.race(running.map(r => r.prom));
@@ -84,12 +96,11 @@ export class ArpHelper {
   async execArp() {
     try {
       this.cache = await execAndParseArp();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   private pingProm() {
-    if ((Date.now() - this.lastPingTime) < 30 * 1000)
+    if (Date.now() - this.lastPingTime < 30 * 1000)
       return this.currentPromise || Promise.resolve();
     this.lastPingTime = Date.now();
     this.currentPromise = this.pingAll();
@@ -99,7 +110,11 @@ export class ArpHelper {
   private async pingAll() {
     const localIps = getLocalIps();
     const ips = localIps.reduce((acc, [a, b, c]) => {
-      return acc.concat(Array.from({ length: 255 }, (_, i) => i).map(d => [a,b,c,d].join('.')))
+      return acc.concat(
+        Array.from({ length: 255 }, (_, i) => i).map(d =>
+          [a, b, c, d].join(".")
+        )
+      );
     }, []);
     await executor(ips, ping, 50);
     await this.execArp();
@@ -111,12 +126,10 @@ export class ArpHelper {
 
     const entry = this.cache[mac.toLowerCase()];
 
-    if (entry)
-      return entry.ip;
+    if (entry) return entry.ip;
 
     this.initPromise.then(() => {
-      if (!this.cache[mac.toLowerCase()])
-        return this.pingProm();
+      if (!this.cache[mac.toLowerCase()]) return this.pingProm();
       return Promise.resolve();
     });
 

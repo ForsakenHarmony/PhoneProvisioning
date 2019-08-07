@@ -32,11 +32,11 @@ export enum TopSoftkeyTypes {
   HotDeskLogin = "hotdesklogin",
   SpeedDialMwi = "speeddialmwi",
   DiscreetRinging = "discreetringing",
-  Empty = "empty",
+  Empty = "empty"
 }
 
 registerEnumType(TopSoftkeyTypes, {
-  name: "TopSoftkeyTypes",
+  name: "TopSoftkeyTypes"
 });
 
 export enum SoftkeyTypes {
@@ -64,11 +64,11 @@ export enum SoftkeyTypes {
   HotDeskLogin = "hotdesklogin",
   DiscreetRinging = "discreetringing",
   History = "callhistory",
-  Empty = "empty",
+  Empty = "empty"
 }
 
 registerEnumType(SoftkeyTypes, {
-  name: "SoftkeyTypes",
+  name: "SoftkeyTypes"
 });
 
 export const PhoneMessages = "PHONES";

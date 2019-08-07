@@ -8,7 +8,7 @@ import { ApolloServer } from "apollo-server-express";
 import { PubSub } from "graphql-subscriptions";
 import express from "express";
 import net from "net";
-import opn from 'open';
+import opn from "open";
 
 import { ArpHelper } from "./api/networking/arp-helpers";
 import { Company } from "./entities/company";
@@ -18,6 +18,8 @@ import { TopSoftkey } from "./entities/top-softkey";
 import { initial1559140753150 } from "./migration/1559140753150-initial";
 import { CompanyResolver } from "./resolvers/companyResolver";
 import { PhoneResolver } from "./resolvers/phoneResolver";
+import { SoftkeyResolver } from "./resolvers/softkeyResolver";
+import { dndSoftkeys1565015427830 } from "./migration/1565015427830-dnd-softkeys";
 
 // register 3rd party IOC container
 ormUseContainer(Container);
@@ -34,15 +36,8 @@ void (async function bootstrap() {
     logger: "advanced-console",
     logging: ["error", "warn", "migration"],
     synchronize: !isProd,
-    entities: [
-      Company,
-      Phone,
-      Softkey,
-      TopSoftkey
-    ],
-    migrations: [
-      initial1559140753150
-    ],
+    entities: [Company, Phone, Softkey, TopSoftkey],
+    migrations: [initial1559140753150, dndSoftkeys1565015427830],
     migrationsRun: isProd
     // dropSchema: true,
   };
@@ -54,7 +49,7 @@ void (async function bootstrap() {
 
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
-    resolvers: [CompanyResolver, PhoneResolver],
+    resolvers: [CompanyResolver, PhoneResolver, SoftkeyResolver],
     emitSchemaFile: !isProd && "../schema.graphql",
     container: Container,
     pubSub
@@ -62,8 +57,8 @@ void (async function bootstrap() {
 
   const app = express();
 
-  const path = require('path');
-  app.use('/', express.static(path.join(__dirname, "./public")));
+  const path = require("path");
+  app.use("/", express.static(path.join(__dirname, "./public")));
 
   // Create GraphQL server
   const server = new ApolloServer({
@@ -73,10 +68,10 @@ void (async function bootstrap() {
     uploads: false,
     debug: true,
     tracing: true,
-    subscriptions: '/api/graphql'
+    subscriptions: "/api/graphql"
   });
 
-  server.applyMiddleware({ app, path: '/api/graphql' });
+  server.applyMiddleware({ app, path: "/api/graphql" });
 
   const http = app.listen(4000, () => {
     server.installSubscriptionHandlers(http);
@@ -112,7 +107,9 @@ void (async function bootstrap() {
       pathname: server.subscriptionsPath
     });
 
-    console.log(`Server is running, GraphQL Playground available at ${serverInfo.url}, Subscriptions at ${serverInfo.subscriptionsUrl}`);
-    isProd && opn('http://localhost:4000')
+    console.log(
+      `Server is running, GraphQL Playground available at ${serverInfo.url}, Subscriptions at ${serverInfo.subscriptionsUrl}`
+    );
+    isProd && opn("http://localhost:4000");
   });
 })().catch(console.error);

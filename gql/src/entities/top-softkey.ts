@@ -4,8 +4,12 @@ import { Lazy } from "../helpers";
 import { Phone } from "./phone";
 import { TopSoftkeyTypes } from "../constants";
 
-@Entity()
 @ObjectType()
+@Entity({
+  orderBy: {
+    idx: "ASC"
+  }
+})
 export class TopSoftkey {
   @Field(type => ID)
   @PrimaryGeneratedColumn("uuid")

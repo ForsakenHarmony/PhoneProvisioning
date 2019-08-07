@@ -9,9 +9,11 @@ import {
   removeSoftkey as removeSoftkeyMut,
   removeTopSoftkey as removeTopSoftkeyMut,
   transferConfig as transferConfigMut,
-  updatePhone,
+  updatePhone as updatePhoneMut,
   updateSoftkey as updateSoftkeyMut,
-  updateTopSoftkey as updateTopSoftkeyMut
+  updateTopSoftkey as updateTopSoftkeyMut,
+  moveSoftkey as moveSoftkeyMut,
+  moveTopSoftkey as moveTopSoftkeyMut,
 } from "../gql/index.gql";
 import {
   SoftkeyConfig,
@@ -20,8 +22,7 @@ import {
 } from "./softkey-config";
 
 import { useMutation } from "@pql/boost";
-import { useCallback, useEffect, useState } from "preact/hooks";
-import { PhoneView } from "./phone-view";
+import { useCallback, useState } from "preact/hooks";
 import { DnD } from "./dnd";
 
 function useManagedMutation(
@@ -62,16 +63,43 @@ export function PhoneConfig({ phone }) {
   const [{}, removeSoftkeyM] = useMutation(removeSoftkeyMut);
   const [{}, copyToAllM] = useMutation(copyToAllMut);
   const [{}, transferConfigM] = useMutation(transferConfigMut);
-  const [{}, importConfigM] = useMutation(importFromPhone);
+  const [{}, importConfig] = useMutation(importFromPhone);
+  const [{}, moveSoftkey] = useMutation(moveSoftkeyMut);
+  const [{}, moveTopSoftkey] = useMutation(moveTopSoftkeyMut);
+  const [{ fetching: updateFetching }, updatePhone] = useMutation(
+    updatePhoneMut
+  );
 
-  const [{ fetching: updateFetching }, updatePhoneMut] = useMutation(
-    updatePhone
+  const move = useCallback(
+    async (from, to) => {
+      const view = activeView === "top_softkeys" ? "topSoftkeys" : "softkeys";
+      const prev = phone[view];
+      try {
+        const next = phone[view].slice();
+        const movedIndex = next.findIndex(p => p.id === from);
+        const toIndex = next.findIndex(p => p.id === to);
+        const moved = next.splice(movedIndex, 1)[0];
+        next.splice(toIndex, 0, moved);
+        phone[view] = next;
+
+        await (activeView === "top_softkeys" ? moveTopSoftkey : moveSoftkey)({
+          from,
+          to
+        });
+        setError(null);
+      } catch (e) {
+        console.error(e);
+        setError(e);
+        phone[view] = prev;
+      }
+    },
+    [moveSoftkey, moveTopSoftkey, activeView]
   );
 
   const updateSkip = useCallback(
     skip => {
       if (!phone) return;
-      updatePhoneMut({
+      updatePhone({
         id: phone.id,
         phone: {
           name: phone.name,
@@ -83,7 +111,7 @@ export function PhoneConfig({ phone }) {
         .then(() => setError(null))
         .catch(e => setError(e));
     },
-    [updatePhoneMut, phone]
+    [updatePhone, phone]
   );
 
   function useManagedSoftkey(mut, varFn) {
@@ -92,7 +120,7 @@ export function PhoneConfig({ phone }) {
     ]);
   }
 
-  const importSoftkeys = useManagedSoftkey(importConfigM, () => ({
+  const importSoftkeys = useManagedSoftkey(importConfig, () => ({
     id: phone.id
   }));
 
@@ -159,6 +187,7 @@ export function PhoneConfig({ phone }) {
         </Localizer>
         <div class="panel-title h5 mt-10">{phone.name}</div>
         <div class="panel-subtitle">{phone.number}</div>
+        {error && <div class="panel-subtitle text-error">{error}</div>}
       </div>
       <nav class="panel-nav">
         <ul class="tab tab-block">
@@ -232,7 +261,7 @@ export function PhoneConfig({ phone }) {
         items={
           activeView === "top_softkeys" ? phone.topSoftkeys : phone.softkeys
         }
-        onMove={console.log}
+        onMove={move}
       />
       <div class="panel-footer">
         <div class="btn-group btn-group-block popover popover-with-trigger">

@@ -939,53 +939,53 @@
   dependencies:
     "@hapi/hoek" "6.x.x"
 
-"@pql/boost@^0.2.0-alpha.17":
-  version "0.2.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/@pql/boost/-/boost-0.2.0-alpha.17.tgz#177d8562355997a932286bf2b10d4b39abd42572"
-  integrity sha512-YKHr6BdhBlKTqYC4Nt7TcBtGrYzu32YkOCafH5XZaVSR15QUDQmgUbjUajRqCam9unrI1/19SmW4Sl/1aAqqtA==
+"@pql/boost@^0.2.0-alpha.18":
+  version "0.2.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@pql/boost/-/boost-0.2.0-alpha.18.tgz#139b7dab76db1e838235253ccc9654b6df6dceb2"
+  integrity sha512-UClo/H5yRJL4Hy6FkjSVYgZMRCSyZI2GNQf1mv0/lK12pWh7yb0kQylSKkIs2lovMnGkWqkfYoaaYFIf7dvtbQ==
   dependencies:
-    "@pql/cache" "^0.2.0-alpha.17"
-    "@pql/client" "^0.2.0-alpha.17"
-    "@pql/hooks" "^0.2.0-alpha.17"
-    "@pql/websocket" "^0.2.0-alpha.17"
+    "@pql/cache" "^0.2.0-alpha.18"
+    "@pql/client" "^0.2.0-alpha.18"
+    "@pql/hooks" "^0.2.0-alpha.18"
+    "@pql/websocket" "^0.2.0-alpha.18"
 
-"@pql/cache@^0.2.0-alpha.17":
-  version "0.2.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/@pql/cache/-/cache-0.2.0-alpha.17.tgz#64f774a909587c06abfcda369a9d6b74318b7855"
-  integrity sha512-2RqxwFqlYOcB/YcYE4YbhDqeDUQVT6Xk8eEGyT/jA7hLT+ycHQXgPd0nKq6lVXs6b6Fgd8qtYTqawKa1huAKxQ==
-  dependencies:
-    "@pql/observable" "^0.2.0-alpha.9"
-
-"@pql/client@^0.2.0-alpha.17":
-  version "0.2.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/@pql/client/-/client-0.2.0-alpha.17.tgz#8b8271c2e0b522caf7c675d53de81e402ee2c9cb"
-  integrity sha512-8gfeMphbIewoiqM71fcZ+Q8AsdPQjeFsUgYlXHQvDMzKFUv3WCbF4JM6JwiM2ru22f75ZgwvvE0SOT9hWPoPyA==
+"@pql/cache@^0.2.0-alpha.18":
+  version "0.2.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@pql/cache/-/cache-0.2.0-alpha.18.tgz#e791e7d5a6c6dc1043ef43ef075c7be5f4c151ed"
+  integrity sha512-iKRnKwJKXQSENnmxVxjKlPae2kFWXQpziwFl97LwNezuqtaOzDtZQTBKdCGYo/uXp2dC4TEW6zsEUbsqGjOCgw==
   dependencies:
     "@pql/observable" "^0.2.0-alpha.9"
-    "@types/graphql" "^14.2.1"
 
-"@pql/hooks@^0.2.0-alpha.17":
-  version "0.2.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/@pql/hooks/-/hooks-0.2.0-alpha.17.tgz#9181cd1d9f0502b8fbd8f65aab7bb71ebeda9d70"
-  integrity sha512-0yukn6IQyxYrJkjAG8PUk6gjMRlE8GzCnHjF5qo3EK7nOsM050gNjppH6QWj4XpeCvJe850GjNMDf9RqWtglvA==
+"@pql/client@^0.2.0-alpha.18":
+  version "0.2.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@pql/client/-/client-0.2.0-alpha.18.tgz#43307d903fc7fc438cc61f776f36c43aa5a61295"
+  integrity sha512-yrKcb/4hDFZiKdln60kdOeWS+k22fQAPkiqII653tkSHWXa0PADVPzoBfoHaLOTLHUkVL53iCOLbs+fK3j7tTA==
+  dependencies:
+    "@pql/observable" "^0.2.0-alpha.9"
+    "@types/graphql" "^14.2.3"
 
-"@pql/macro@^0.2.0-alpha.17":
-  version "0.2.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/@pql/macro/-/macro-0.2.0-alpha.17.tgz#71af1bbf1fc8f04b0de0f00c9d0d9f2c5faa0270"
-  integrity sha512-H838Mm1Xhw4IfHp+w5D+6TmHWi8jU3k4UGHRyzu7UpYeQtKtv4bKacepkiWJLGb1S/2K9Gi8hosbRQzwGWaAiA==
+"@pql/hooks@^0.2.0-alpha.18":
+  version "0.2.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@pql/hooks/-/hooks-0.2.0-alpha.18.tgz#823d54df4186c2dbb2b5a858664a9f7ae56a1323"
+  integrity sha512-QZ5BIYCxGahMC3deZ5JEfcwguTFs2bbbxwOa/6EmmcgyILc9wjwOUuSudsn6A/9K/ikH+HifUtgwSTUSJqlqRg==
+
+"@pql/macro@^0.2.0-alpha.18":
+  version "0.2.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@pql/macro/-/macro-0.2.0-alpha.18.tgz#6b58d0e8c9de8648246e597db221433fe07f4fe7"
+  integrity sha512-G07F/yZOuZxe51/Ta4ZDtQU7kmYDYIy7NVvYi7rUM2JDnm0qvUjgrQ8ZQko0cWd5JarhZJRrpElmaDfdOsWiUQ==
   dependencies:
     babel-plugin-macros "^2.6.1"
-    graphql "^14.3.1"
+    graphql "^14.4.2"
 
 "@pql/observable@^0.2.0-alpha.9":
   version "0.2.0-alpha.9"
   resolved "https://registry.yarnpkg.com/@pql/observable/-/observable-0.2.0-alpha.9.tgz#9c48a0668b316e28aaff18384f0b947321e68cf0"
   integrity sha512-H7uBPxtsVCtsmKGLGIoqUIWiYAN8lfM/oHJrEFr98YTCGTlLO3IS2qMbcxKvz3rywwvp20H4jQarlUcLhEuOrw==
 
-"@pql/websocket@^0.2.0-alpha.17":
-  version "0.2.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/@pql/websocket/-/websocket-0.2.0-alpha.17.tgz#5071a84d7dd127f4cd7c2d3480ccd9b88d3244d6"
-  integrity sha512-jZq6rePvNwdyRS3a1ARKCKYchiSB61rfN5D5Y6EnYPa7LJmeJHL8NTQiZEbgvMCjuKMM/mgxP3RBPA9ZqH1bQw==
+"@pql/websocket@^0.2.0-alpha.18":
+  version "0.2.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@pql/websocket/-/websocket-0.2.0-alpha.18.tgz#10b23e0294e3de3e9543899cac876bdae2482979"
+  integrity sha512-43NuQDWiuP3eKWI/jBaCmTOtAgqmrR6Jua1m0A51Grkvpcq8HtgzhpIgZSbK8/BVsPBhDqO6pJOoJrYdLgqGdw==
   dependencies:
     "@pql/observable" "^0.2.0-alpha.9"
 
@@ -1022,10 +1022,10 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/graphql@^14.2.1":
-  version "14.2.2"
-  resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-14.2.2.tgz#10f197e6f8559c11b16d630c5e9c10c3c8e61c5e"
-  integrity sha512-okXbUmdZFMO3AYBEJCcpJFPFDkKmIiZZBqWD5TmPtAv+GHfjD2qLZEI0PvZ8IWMU4ozoK2HV2lDxWjw4LbVlnw==
+"@types/graphql@^14.2.3":
+  version "14.2.3"
+  resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-14.2.3.tgz#cfc6420a67eb20420786f90112357921974593b9"
+  integrity sha512-UoCovaxbJIxagCvVfalfK7YaNhmxj3BQFRQ2RHQKLiu+9wNXhJnlbspsLHt/YQM99IaLUUFJNzCwzc6W0ypMeQ==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -4179,13 +4179,6 @@ graceful-fs@^4.1.15, graceful-fs@^4.1.6:
   version "4.1.15"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.15.tgz#ffb703e1066e8a0eeaa4c8b80ba9253eeefbfb00"
   integrity sha512-6uHUhOPEBgQ24HM+r6b/QwWfZq+yiFcipKFrOFiBEnWdy5sdzYoi+pJeQaPI5qOLRFqWmAXUPQNsielzdLoecA==
-
-graphql@^14.3.1:
-  version "14.3.1"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.3.1.tgz#b3aa50e61a841ada3c1f9ccda101c483f8e8c807"
-  integrity sha512-FZm7kAa3FqKdXy8YSSpAoTtyDFMIYSpCDOr+3EqlI1bxmtHu+Vv/I2vrSeT1sBOEnEniX3uo4wFhFdS/8XN6gA==
-  dependencies:
-    iterall "^1.2.2"
 
 graphql@^14.4.2:
   version "14.4.2"

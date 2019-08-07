@@ -6,4 +6,3 @@ export class CompanyInput implements Partial<Company> {
   @Field()
   name!: string;
 }
-

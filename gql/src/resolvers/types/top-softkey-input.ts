@@ -17,4 +17,3 @@ export class TopSoftkeyInput implements DeepPartial<TopSoftkey> {
   @Field({ nullable: true })
   line?: number;
 }
-

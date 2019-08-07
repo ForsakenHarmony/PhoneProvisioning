@@ -18,4 +18,3 @@ export class PhoneInput implements Partial<Phone> {
   @Field({ defaultValue: false })
   skipContacts!: boolean;
 }
-

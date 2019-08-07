@@ -39,6 +39,8 @@ type Mutation {
   transferConfigToPhones(companyId: ID!): Boolean!
   exportCompany(companyId: ID!): RawCompany!
   importCompany(company: RawCompanyInput!): Company!
+  moveSoftkey(to: ID!, from: ID!): [Softkey!]!
+  moveTopSoftkey(to: ID!, from: ID!): [TopSoftkey!]!
 }
 
 type Phone {

@@ -21,11 +21,10 @@ export enum PhoneStatus {
 }
 
 registerEnumType(PhoneStatus, {
-  name: "PhoneStatus",
+  name: "PhoneStatus"
 });
 
 export interface PhoneNotificationPayload {
   id: string;
   status: PhoneStatus;
 }
-

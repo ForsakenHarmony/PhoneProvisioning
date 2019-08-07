@@ -13,8 +13,8 @@
     "prettier": "^1.18.2"
   },
   "dependencies": {
-    "@pql/boost": "^0.2.0-alpha.17",
-    "@pql/macro": "^0.2.0-alpha.17",
+    "@pql/boost": "^0.2.0-alpha.18",
+    "@pql/macro": "^0.2.0-alpha.18",
     "blueprint-css": "^3.1.1",
     "clsx": "^1.0.4",
     "graphql": "^14.4.2",

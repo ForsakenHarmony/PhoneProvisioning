@@ -32,4 +32,3 @@ export class SoftkeyInput implements DeepPartial<Softkey> {
   @Field({ nullable: true })
   busy?: boolean;
 }
-

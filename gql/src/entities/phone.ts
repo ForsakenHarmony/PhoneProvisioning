@@ -1,6 +1,6 @@
 import { Field, ID, Int, ObjectType } from "type-graphql";
 import { Column, Entity, OneToMany, ManyToOne, PrimaryColumn } from "typeorm";
-import { Matches, MaxLength } from 'class-validator';
+import { Matches, MaxLength } from "class-validator";
 
 import { Lazy } from "../helpers";
 import { Company } from "./company";
@@ -50,6 +50,9 @@ export class Phone {
 
   @MaxLength(20)
   @Field(type => [TopSoftkey])
-  @OneToMany(type => TopSoftkey, key => key.phone, { lazy: true, cascade: true })
+  @OneToMany(type => TopSoftkey, key => key.phone, {
+    lazy: true,
+    cascade: true
+  })
   topSoftkeys!: Lazy<TopSoftkey[]>;
 }

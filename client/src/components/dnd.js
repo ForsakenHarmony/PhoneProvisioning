@@ -104,33 +104,6 @@ export class DnD extends Component {
         })
       )
     });
-
-    // return (
-    //   <Container aria-dropeffect="move">
-    //     {newItems.map((data, idx) => (
-    //       <Item
-    //         key={data[prop]}
-    //         data={data}
-    //         handle={
-    //           Handle && (
-    //             <Handle
-    //               onMouseDown={this.onMouseDown.bind(this, idx)}
-    //               onMouseUp={this.onMouseUp.bind(this)}
-    //             />
-    //           )
-    //         }
-    //         draggable={!Handle || draggable === idx}
-    //         over={dragging && idx === over}
-    //         onDragStart={this.dragStart.bind(this, idx)}
-    //         onDragEnd={this.dragEnd.bind(this)}
-    //         onDragOver={this.dragOver.bind(this, idx)}
-    //         onDrop={this.drop.bind(this, idx)}
-    //         role="option"
-    //         aria-grabbed={dragging && idx === over}
-    //       />
-    //     ))}
-    //   </Container>
-    // );
   }
 }
 

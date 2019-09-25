@@ -16,30 +16,30 @@
     "prettier": "prettier src/**/*.{ts,js,json} --write"
   },
   "dependencies": {
-    "apollo-server": "^2.8.1",
+    "apollo-server": "^2.9.4",
     "arpping": "^0.2.0",
     "axios": "^0.19.0",
     "class-transformer": "^0.2.3",
-    "class-validator": "^0.9.1",
+    "class-validator": "^0.10.1",
     "express": "^4.17.1",
     "flru": "^1.0.2",
-    "graphql": "^14.4.2",
+    "graphql": "^14.5.7",
     "open": "^6.4.0",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^4.0.9",
-    "type-graphql": "^0.17.4",
+    "type-graphql": "^0.17.5",
     "typedi": "^0.8.0",
-    "typeorm": "^0.2.18",
+    "typeorm": "^0.2.19",
     "typeorm-typedi-extensions": "^0.2.3"
   },
   "devDependencies": {
-    "@types/graphql": "^14.2.3",
-    "nodemon": "^1.19.1",
+    "@types/graphql": "^14.5.0",
+    "nodemon": "^1.19.2",
     "pkg": "^4.4.0",
     "prettier": "^1.18.2",
-    "ts-node": "^8.3.0",
-    "ts-node-dev": "^1.0.0-pre.40",
-    "typescript": "^3.5.3"
+    "ts-node": "^8.4.1",
+    "ts-node-dev": "^1.0.0-pre.43",
+    "typescript": "^3.6.3"
   },
   "pkg": {
     "scripts": "dist/**/*.js",

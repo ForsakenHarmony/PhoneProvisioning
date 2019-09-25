@@ -9,7 +9,7 @@
     "prettier": "prettier src/**/*.{js,css,json} --write"
   },
   "devDependencies": {
-    "preact-cli": "^3.0.0-rc.3",
+    "preact-cli": "^3.0.0-rc.5",
     "prettier": "^1.18.2"
   },
   "dependencies": {
@@ -17,12 +17,12 @@
     "@pql/macro": "^0.2.0-alpha.18",
     "blueprint-css": "^3.1.1",
     "clsx": "^1.0.4",
-    "graphql": "^14.4.2",
-    "preact": "^10.0.0-rc.0",
+    "graphql": "^14.5.7",
+    "preact": "^10.0.0-rc.3",
     "preact-feather": "^3.2.0",
     "preact-i18n": "^2.0.0-preactx.2",
     "preact-router": "^3.0.1",
     "spectre.css": "^0.5.8",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.3"
   }
 }

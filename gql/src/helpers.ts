@@ -20,7 +20,13 @@ export async function moveEntity<
   P extends { [CKF in CK]: Lazy<E[]> } & { id: string },
   PK extends string,
   CK extends string
->(repo: Repository<E>, from: string, to: string, parentKey: PK, childKey: CK): Promise<E[]> {
+>(
+  repo: Repository<E>,
+  from: string,
+  to: string,
+  parentKey: PK,
+  childKey: CK
+): Promise<E[]> {
   const fromEntity = await repo.findOneOrFail(from, { relations: [parentKey] });
   const toEntity = await repo.findOneOrFail(to, { relations: [parentKey] });
   const parent: P = await (fromEntity[parentKey] as Lazy<P>);

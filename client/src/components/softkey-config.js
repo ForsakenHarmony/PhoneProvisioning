@@ -154,27 +154,32 @@ export const SoftkeyConfig = ({
           {softkey.value && `[ ${softkey.value} ]`}
         </div>
       </div>
-      <div class="tile-action popover popover-left" onMouseEnter={() => setPopover(true)} onMouseLeave={() => setPopover(false)}>
+      <div
+        class="tile-action popover popover-left"
+        onMouseEnter={() => setPopover(true)}
+        onMouseLeave={() => setPopover(false)}
+      >
         <Localizer>
           <button type="button" class="btn btn-link btn-action btn-lg">
             <Edit />
           </button>
         </Localizer>
-        {popover && (isTop ? (
-          <TopSoftkeyPopover
-            softkey={softkey}
-            set={set}
-            remove={remove}
-            loading={loading}
-          />
-        ) : (
-          <SoftkeyPopover
-            softkey={softkey}
-            set={set}
-            remove={remove}
-            loading={loading}
-          />
-        ))}
+        {popover &&
+          (isTop ? (
+            <TopSoftkeyPopover
+              softkey={softkey}
+              set={set}
+              remove={remove}
+              loading={loading}
+            />
+          ) : (
+            <SoftkeyPopover
+              softkey={softkey}
+              set={set}
+              remove={remove}
+              loading={loading}
+            />
+          ))}
       </div>
     </div>
   );

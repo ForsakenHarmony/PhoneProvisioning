@@ -13,7 +13,7 @@ import {
   updateSoftkey as updateSoftkeyMut,
   updateTopSoftkey as updateTopSoftkeyMut,
   moveSoftkey as moveSoftkeyMut,
-  moveTopSoftkey as moveTopSoftkeyMut,
+  moveTopSoftkey as moveTopSoftkeyMut
 } from "../gql/index.gql";
 import {
   SoftkeyConfig,

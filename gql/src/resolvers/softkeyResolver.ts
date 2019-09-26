@@ -31,6 +31,12 @@ export class SoftkeyResolver {
     @Arg("from", type => ID) from: string,
     @Arg("to", type => ID) to: string
   ): Promise<TopSoftkey[]> {
-    return moveEntity(this.topSoftkeyRepository, from, to, "phone", "topSoftkeys");
+    return moveEntity(
+      this.topSoftkeyRepository,
+      from,
+      to,
+      "phone",
+      "topSoftkeys"
+    );
   }
 }

@@ -17,7 +17,7 @@ import {
   useRef,
   useState
 } from "preact/hooks";
-import genUUID from 'uuid/v4';
+import genUUID from "uuid/v4";
 
 export function CompanyPhones({ company }) {
   const [{ fetching: addFetching }, addPhoneMut] = useMutation(addPhone);

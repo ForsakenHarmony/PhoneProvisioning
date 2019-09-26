@@ -1,6 +1,6 @@
 {
   "name": "phone-gql-server",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "bin": "dist/index.js",
   "main": "src/index.ts",
   "author": "me@hrmny.sh",
@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsnd  --no-notify --respawn .",
     "debug": "tsnd --respawn --inspect .",
-    "build": "tsc && pkg --public -t node10-win-x64 -o ../PhoneProvisioning_1.1.1 .",
+    "build": "tsc && pkg --public -t node10-win-x64 -o ../PhoneProvisioning_1.1.2 .",
     "build:ts": "tsc",
     "create-migration": "ts-node ./node_modules/typeorm/cli.js migration:create",
     "generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate",
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/graphql": "^14.5.0",
+    "@types/node": "^12.7.7",
     "nodemon": "^1.19.2",
     "pkg": "^4.4.0",
     "prettier": "^1.18.2",

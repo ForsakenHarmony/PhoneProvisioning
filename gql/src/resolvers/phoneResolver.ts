@@ -134,10 +134,7 @@ export class PhoneResolver {
   async removePhone(@Arg("id", type => ID) id: string): Promise<Phone> {
     const phone = await this.phoneRepository.findOneOrFail(id);
 
-    await this.topSoftkeyRepository.remove(await phone.topSoftkeys);
-    await this.softkeyRepository.remove(await phone.softkeys);
-
-    console.log("remove", await this.phoneRepository.remove(phone));
+    await this.phoneRepository.remove(phone, { transaction: true });
 
     return Object.assign(phone, { id });
   }
@@ -276,10 +273,12 @@ export class PhoneResolver {
     await this.softkeyRepository.remove(await phone.softkeys);
     await this.topSoftkeyRepository.remove(await phone.topSoftkeys);
 
-    const { softkeys, topSoftkeys } = await api.readSoftkeys();
+    const { softkeys, topSoftkeys, name, number } = await api.readSoftkeys();
 
     phone.softkeys = softkeys;
     phone.topSoftkeys = topSoftkeys;
+    phone.name = name || phone.name;
+    phone.number = number || phone.number;
 
     return await this.phoneRepository.save(phone);
   }

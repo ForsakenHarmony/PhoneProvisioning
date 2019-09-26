@@ -346,3 +346,32 @@ export const importFromPhone = gql`
     }
   }
 `;
+
+export const findPhones = gql`
+  mutation findPhones($companyId: ID!) {
+    findPhones(companyId: $companyId) {
+      id
+      name
+      phones {
+        id
+        name
+        number
+        mac
+        status
+        skipContacts
+        topSoftkeys {
+          id
+          type
+          label
+          value
+        }
+        softkeys {
+          id
+          type
+          label
+          value
+        }
+      }
+    }
+  }
+`;

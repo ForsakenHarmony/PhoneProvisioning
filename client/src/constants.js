@@ -31,6 +31,7 @@ export const definition = {
   remove_company: "Kunden löschen",
   with_contacts: "Mit Kontakten",
   without_contacts: "Ohne Kontakte",
+  find_phones: "Telefone suchen",
   softkey: {
     "": "Kein",
     line: "Leitung",

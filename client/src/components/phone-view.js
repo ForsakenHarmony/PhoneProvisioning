@@ -25,7 +25,7 @@ export const PhoneView = ({
         class="form-input"
         type="text"
         required
-        pattern="[\w ]{2,}"
+        pattern="[\w -.]{2,}"
         // form={id}
         value={phone.name}
         onBlur={update.bind(null, "name")}

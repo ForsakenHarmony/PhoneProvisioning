@@ -165,7 +165,7 @@ export class PhoneApi {
     await this.postRpc(xml);
   }
 
-  async readConfig(): Promise<{ [key: string]: string }> {
+  private async readConfig(): Promise<{ [key: string]: string }> {
     const { data: serverData } = await this.get<string>("/servercfg.html");
     const { data: localData } = await this.get<string>("/localcfg.html");
 
@@ -190,6 +190,8 @@ export class PhoneApi {
   async readSoftkeys(): Promise<{
     softkeys: Softkey[];
     topSoftkeys: TopSoftkey[];
+    name: string,
+    number: string,
   }> {
     const cfg = await this.readConfig();
     const softkeys: Softkey[] = [];
@@ -212,7 +214,9 @@ export class PhoneApi {
 
     return {
       softkeys: softkeys.filter(Boolean).filter(s => s.type),
-      topSoftkeys: topSoftkeys.filter(Boolean).filter(s => s.type)
+      topSoftkeys: topSoftkeys.filter(Boolean).filter(s => s.type),
+      name: cfg["sip line1 screen name"],
+      number: cfg["sip line1 auth name"]
     };
   }
 

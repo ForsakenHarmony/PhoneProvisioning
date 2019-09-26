@@ -7,6 +7,7 @@ import { Container } from "typedi";
 import { Phone } from "../entities/phone";
 import { RawCompany } from "./types/raw-company";
 import { PhoneResolver } from "./phoneResolver";
+import { ArpHelper } from "../api/networking/arp-helpers";
 
 @Resolver(Company)
 export class CompanyResolver {
@@ -62,6 +63,49 @@ export class CompanyResolver {
     );
 
     return true;
+  }
+
+  @Mutation(returns => Company)
+  async findPhones(@Arg("companyId", type => ID) companyId: string) {
+    // Aastra vendor
+    const list = await Container.get(ArpHelper).findMacsInNamespace("00:08:5D");
+
+    console.log("found", list);
+
+    const company = await this.companyRepo.findOneOrFail(companyId, {
+      relations: ["phones"]
+    });
+    const phones = await company.phones;
+
+    const idx =
+      phones.reduce((acc, val) => (val.idx > acc ? val.idx : acc), 0) + 1;
+    const newPhones = list
+      .filter(
+        mac =>
+          phones.findIndex(p => p.mac && p.mac.toUpperCase() === mac) === -1
+      )
+      .map((mac, i) => {
+        return this.phoneRepo.create({
+          idx: idx + i,
+          name: "?",
+          number: "0",
+          mac
+        });
+      });
+
+    phones.push(...newPhones);
+    await this.companyRepo.save(company);
+
+    const phoneResolver = Container.get(PhoneResolver);
+    await Promise.all(
+      newPhones.map(async phone =>
+        phoneResolver.importConfigFromPhone(phone.id)
+      )
+    );
+
+    return await this.companyRepo.findOneOrFail(companyId, {
+      relations: ["phones"]
+    });
   }
 
   @Mutation(returns => RawCompany)

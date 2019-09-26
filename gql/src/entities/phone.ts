@@ -45,14 +45,15 @@ export class Phone {
 
   @MaxLength(18)
   @Field(type => [Softkey])
-  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: true })
+  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: true, onDelete: "CASCADE" })
   softkeys!: Lazy<Softkey[]>;
 
   @MaxLength(20)
   @Field(type => [TopSoftkey])
   @OneToMany(type => TopSoftkey, key => key.phone, {
     lazy: true,
-    cascade: true
+    cascade: true,
+    onDelete: "CASCADE"
   })
   topSoftkeys!: Lazy<TopSoftkey[]>;
 }

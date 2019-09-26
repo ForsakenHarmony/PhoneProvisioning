@@ -31,9 +31,9 @@ async function execAndParseArp() {
       const ip = entry[1];
       const mac = entry[2].replace(/-/g, ":");
       const type = entry[3];
-      map[mac.toLowerCase()] = {
+      map[mac.toUpperCase()] = {
         ip,
-        mac,
+        mac: mac.toUpperCase(),
         type
       };
     }
@@ -43,7 +43,7 @@ async function execAndParseArp() {
 }
 
 async function ping(ip: string) {
-  console.log("ping", ip);
+  // console.log("ping", ip);
   try {
     await execProm(`ping -4 -w 100 -n 1 ${ip}`);
   } catch (e) {}
@@ -121,15 +121,24 @@ export class ArpHelper {
     this.currentPromise = null;
   }
 
+  async findMacsInNamespace(namespace: string) {
+    await this.initPromise;
+    await this.pingProm();
+
+    return Object.values(this.cache)
+      .map(e => e.mac)
+      .filter(mac => mac.startsWith(namespace.toUpperCase()));
+  }
+
   findIpForMac(mac: string): string | undefined {
     if (!mac.trim()) return;
 
-    const entry = this.cache[mac.toLowerCase()];
+    const entry = this.cache[mac.toUpperCase()];
 
     if (entry) return entry.ip;
 
     this.initPromise.then(() => {
-      if (!this.cache[mac.toLowerCase()]) return this.pingProm();
+      if (!this.cache[mac.toUpperCase()]) return this.pingProm();
       return Promise.resolve();
     });
 
@@ -141,13 +150,13 @@ export class ArpHelper {
 
     await this.initPromise;
 
-    let entry = this.cache[mac.toLowerCase()];
+    let entry = this.cache[mac.toUpperCase()];
     if (entry) return entry.ip;
 
-    console.log(mac, this.cache);
+    // console.log(mac, this.cache);
     await this.pingProm();
 
-    entry = this.cache[mac.toLowerCase()];
+    entry = this.cache[mac.toUpperCase()];
     if (entry) return entry.ip;
 
     return;

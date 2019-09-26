@@ -37,6 +37,7 @@ type Mutation {
   addCompany(company: CompanyInput!): Company!
   removeCompany(companyId: ID!): Company!
   transferConfigToPhones(companyId: ID!): Boolean!
+  findPhones(companyId: ID!): Company!
   exportCompany(companyId: ID!): RawCompany!
   importCompany(company: RawCompanyInput!): Company!
   moveSoftkey(to: ID!, from: ID!): [Softkey!]!

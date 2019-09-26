@@ -6,7 +6,8 @@ import {
   removePhone,
   movePhones,
   transferConfigToAll,
-  updatePhone
+  updatePhone,
+  findPhones
 } from "../gql/index.gql";
 import clsx from "clsx";
 import { useMutation } from "@pql/boost";
@@ -31,13 +32,17 @@ export function CompanyPhones({ company }) {
   const [{ fetching: updateFetching }, updatePhoneMut] = useMutation(
     updatePhone
   );
+  const [{ fetching: findFetching }, findPhonesMut] = useMutation(
+    findPhones
+  );
 
   const loading =
     addFetching ||
     removeFetching ||
     moveFetching ||
     transferFetching ||
-    updateFetching;
+    updateFetching ||
+    findFetching;
 
   const [phoneState, setState] = useState({
     id: genUUID(),
@@ -140,6 +145,14 @@ export function CompanyPhones({ company }) {
       .catch(e => setError(e));
   }, [transferMut, company]);
 
+  const find = useCallback(() => {
+    findPhonesMut({
+      companyId: company.id
+    })
+      .then(() => setError(null))
+      .catch(e => setError(e));
+  }, [findPhonesMut, company]);
+
   return (
     <div class="card card-phones" id="list">
       <div class="card-header">
@@ -210,6 +223,12 @@ export function CompanyPhones({ company }) {
           onClick={transfer}
         >
           <Text id="transfer_config" />
+        </button>
+        <button
+          className={clsx("btn btn-primary", { loading: loading })}
+          onClick={find}
+        >
+          <Text id="find_phones"/>
         </button>
       </div>
     </div>

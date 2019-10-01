@@ -49,6 +49,7 @@ type Phone {
   idx: Int!
   name: String!
   number: String!
+  type: String
   mac: String
   skipContacts: Boolean
   company: Company!
@@ -98,6 +99,7 @@ type RawPhone {
   idx: Float!
   name: String!
   number: String!
+  type: String
   mac: String
   skipContacts: Boolean
   softkeys: [RawSoftkey!]!
@@ -108,6 +110,7 @@ input RawPhoneInput {
   idx: Float!
   name: String!
   number: String!
+  type: String
   mac: String
   skipContacts: Boolean = false
   softkeys: [RawSoftkeyInput!]!

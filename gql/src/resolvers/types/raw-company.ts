@@ -61,6 +61,9 @@ export class RawPhone {
   number!: string;
 
   @Field({ nullable: true })
+  type?: string;
+
+  @Field({ nullable: true })
   mac?: string;
 
   @Field({ defaultValue: false })

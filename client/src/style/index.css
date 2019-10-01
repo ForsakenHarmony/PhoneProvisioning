@@ -110,6 +110,21 @@ body {
   justify-content: space-between;
 }
 
+.card-softkey .panel-subtitle {
+  align-items: center;
+  justify-content: space-evenly;
+  display: flex;
+}
+
+.card-softkey .panel-subtitle span {
+  display: flex;
+  align-items: center;
+}
+
+.card-softkey .panel-subtitle svg {
+  margin-right: 5px;
+}
+
 /*.card-phones {*/
 /*  width: 700px;*/
 /*}*/

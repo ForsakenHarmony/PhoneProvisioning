@@ -190,8 +190,9 @@ export class PhoneApi {
   async readSoftkeys(): Promise<{
     softkeys: Softkey[];
     topSoftkeys: TopSoftkey[];
-    name: string,
-    number: string,
+    name: string;
+    number: string;
+    type: string;
   }> {
     const cfg = await this.readConfig();
     const softkeys: Softkey[] = [];
@@ -216,8 +217,17 @@ export class PhoneApi {
       softkeys: softkeys.filter(Boolean).filter(s => s.type),
       topSoftkeys: topSoftkeys.filter(Boolean).filter(s => s.type),
       name: cfg["sip line1 screen name"],
-      number: cfg["sip line1 auth name"]
+      number: cfg["sip line1 auth name"],
+      type: await this.getPhoneType()
     };
+  }
+
+  async getPhoneType(): Promise<string> {
+    const { data: doc } = await this.get<string>("/");
+    const match = /<title>(.+?)<\/title>/.exec(doc);
+    if (match == null) throw new Error("Can't find title in document");
+    const title = match[1].trim();
+    return title.split(" ")[1];
   }
 
   assertHasIP() {
@@ -330,7 +340,7 @@ function createAxios(ip: string, auth: { username: string; password: string }) {
           }]`
         );
         if (!err.request.config) {
-          console.error(err);
+          console.error(err.stack);
         }
       } else {
         alog(`[xx] ${err && err.message}`);

@@ -250,10 +250,15 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.10.tgz#4fa76e6598b7de3f0cb6ec3abacc4f59e5b3a2ce"
   integrity sha512-8xZEYckCbUVgK8Eg7lf5Iy4COKJ5uXlnIOnePN0WUwSQggy9tolM+tDJf7wMOnT/JT/W9xDYIaYggt3mRV2O5w==
 
-"@types/node@^12.6.2", "@types/node@^12.7.7":
+"@types/node@^12.6.2":
   version "12.7.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.7.tgz#f9bd8c00fa9e1a8129af910fc829f6139c397d6c"
   integrity sha512-4jUncNe2tj1nmrO/34PsRpZqYVnRV1svbU78cKhuQKkMntKB/AmdLyGgswcZKjFHEHGpiY8pVD8CuVI55nP54w==
+
+"@types/node@^12.7.8":
+  version "12.7.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.8.tgz#cb1bf6800238898bc2ff6ffa5702c3cadd350708"
+  integrity sha512-FMdVn84tJJdV+xe+53sYiZS4R5yn1mAIxfj+DVoNiQjTYz1+OYmjwEZr1ev9nU0axXwda0QDbYl06QHanRVH3A==
 
 "@types/range-parser@*":
   version "1.2.2"
@@ -2364,10 +2369,17 @@ graphql-upload@^8.0.2:
     http-errors "^1.7.1"
     object-path "^0.11.4"
 
-graphql@*, graphql@^14.5.7:
+graphql@*:
   version "14.5.7"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.5.7.tgz#8646a3fcc07922319cc3967eba4a64b32929f77f"
   integrity sha512-as410RMJSUFqF8RcH2QWxZ5ioqHzsH9VWnWbaU+UnDXJ/6azMDIYPrtXCBPXd8rlunEVb7W8z6fuUnNHMbFu9A==
+  dependencies:
+    iterall "^1.2.2"
+
+graphql@^14.5.8:
+  version "14.5.8"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.5.8.tgz#504f3d3114cb9a0a3f359bbbcf38d9e5bf6a6b3c"
+  integrity sha512-MMwmi0zlVLQKLdGiMfWkgQD7dY/TUKt4L+zgJ/aR0Howebod3aNgP5JkgvAULiR2HPVZaP2VEElqtdidHweLkg==
   dependencies:
     iterall "^1.2.2"
 
@@ -3660,10 +3672,10 @@ node-pre-gyp@^0.11.0:
     semver "^5.3.0"
     tar "^4"
 
-nodemon@^1.19.2:
-  version "1.19.2"
-  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.19.2.tgz#b0975147dc99b3761ceb595b3f9277084931dcc0"
-  integrity sha512-hRLYaw5Ihyw9zK7NF+9EUzVyS6Cvgc14yh8CAYr38tPxJa6UrOxwAQ351GwrgoanHCF0FalQFn6w5eoX/LGdJw==
+nodemon@^1.19.3:
+  version "1.19.3"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.19.3.tgz#db71b3e62aef2a8e1283a9fa00164237356102c0"
+  integrity sha512-TBNKRmJykEbxpTniZBusqRrUTHIEqa2fpecbTQDQj1Gxjth7kKAPP296ztR0o5gPUWsiYbuEbt73/+XMYab1+w==
   dependencies:
     chokidar "^2.1.5"
     debug "^3.1.0"
@@ -5252,10 +5264,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-sqlite3@^4.0.9:
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-4.0.9.tgz#cff74550fa5a1159956815400bdef69245557640"
-  integrity sha512-IkvzjmsWQl9BuBiM4xKpl5X8WCR4w0AeJHRdobCdXZ8dT/lNc1XS6WqvY35N6+YzIIgzSBeY5prdFObID9F9tA==
+sqlite3@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-4.1.0.tgz#e051fb9c133be15726322a69e2e37ec560368380"
+  integrity sha512-RvqoKxq+8pDHsJo7aXxsFR18i+dU2Wp5o12qAJOV5LNcDt+fgJsc2QKKg3sIRfXrN9ZjzY1T7SNe/DFVqAXjaw==
   dependencies:
     nan "^2.12.1"
     node-pre-gyp "^0.11.0"

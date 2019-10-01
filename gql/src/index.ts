@@ -15,11 +15,13 @@ import { Company } from "./entities/company";
 import { Phone } from "./entities/phone";
 import { Softkey } from "./entities/softkey";
 import { TopSoftkey } from "./entities/top-softkey";
-import { initial1559140753150 } from "./migration/1559140753150-initial";
 import { CompanyResolver } from "./resolvers/companyResolver";
 import { PhoneResolver } from "./resolvers/phoneResolver";
 import { SoftkeyResolver } from "./resolvers/softkeyResolver";
-import { dndSoftkeys1565015427830 } from "./migration/1565015427830-dnd-softkeys";
+
+import { initial1559140753150 } from "./migrations/1559140753150-initial";
+import { dndSoftkeys1565015427830 } from "./migrations/1565015427830-dnd-softkeys";
+import { phoneType1569939955129 } from "./migrations/1569939955129-phone-type";
 
 // register 3rd party IOC container
 ormUseContainer(Container);
@@ -37,7 +39,11 @@ void (async function bootstrap() {
     logging: ["error", "warn", "migration"],
     synchronize: !isProd,
     entities: [Company, Phone, Softkey, TopSoftkey],
-    migrations: [initial1559140753150, dndSoftkeys1565015427830],
+    migrations: [
+      initial1559140753150,
+      dndSoftkeys1565015427830,
+      phoneType1569939955129
+    ],
     migrationsRun: isProd
     // dropSchema: true,
   };

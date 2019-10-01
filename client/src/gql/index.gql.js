@@ -9,6 +9,7 @@ export const companies = gql`
         id
         name
         number
+        type
         mac
         status
         skipContacts
@@ -38,6 +39,7 @@ export const company = gql`
         id
         name
         number
+        type
         mac
         status
         skipContacts
@@ -67,6 +69,7 @@ export const addCompany = gql`
         id
         name
         number
+        type
         mac
         status
         skipContacts
@@ -99,6 +102,7 @@ export const addPhone = gql`
       id
       name
       number
+      type
       mac
       status
       skipContacts
@@ -270,6 +274,7 @@ export const phoneStatus = gql`
         id
         name
         number
+        type
         mac
         status
         skipContacts
@@ -298,6 +303,7 @@ export const exportCompany = gql`
       phones {
         name
         number
+        type
         mac
         idx
         skipContacts
@@ -356,6 +362,7 @@ export const findPhones = gql`
         id
         name
         number
+        type
         mac
         status
         skipContacts

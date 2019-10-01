@@ -1,5 +1,5 @@
 import { Localizer, Text } from "./i18n";
-import { Copy, Plus, Save, Download, UserX, UserCheck } from "preact-feather";
+import { Copy, Plus, Save, Download, UserX, UserCheck, Phone, Hash } from "preact-feather";
 import clsx from "clsx";
 import {
   addSoftkey as addSoftkeyMut,
@@ -186,7 +186,10 @@ export function PhoneConfig({ phone }) {
           </div>
         </Localizer>
         <div class="panel-title h5 mt-10">{phone.name}</div>
-        <div class="panel-subtitle">{phone.number}</div>
+        <div class="panel-subtitle h6">
+          {phone.type && (<span><Phone size={20}/>{phone.type}  </span>)}
+          <span><Hash size={20}/>{phone.number}</span>
+        </div>
         {error && <div class="panel-subtitle text-error">{error}</div>}
       </div>
       <nav class="panel-nav">

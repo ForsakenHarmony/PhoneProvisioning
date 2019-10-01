@@ -32,6 +32,10 @@ export class Phone {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  type?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   @Matches(/^(?:[0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}$/)
   mac?: string;
 
@@ -45,7 +49,11 @@ export class Phone {
 
   @MaxLength(18)
   @Field(type => [Softkey])
-  @OneToMany(type => Softkey, key => key.phone, { lazy: true, cascade: true, onDelete: "CASCADE" })
+  @OneToMany(type => Softkey, key => key.phone, {
+    lazy: true,
+    cascade: true,
+    onDelete: "CASCADE"
+  })
   softkeys!: Lazy<Softkey[]>;
 
   @MaxLength(20)

@@ -273,12 +273,19 @@ export class PhoneResolver {
     await this.softkeyRepository.remove(await phone.softkeys);
     await this.topSoftkeyRepository.remove(await phone.topSoftkeys);
 
-    const { softkeys, topSoftkeys, name, number } = await api.readSoftkeys();
+    const {
+      softkeys,
+      topSoftkeys,
+      name,
+      number,
+      type
+    } = await api.readSoftkeys();
 
     phone.softkeys = softkeys;
     phone.topSoftkeys = topSoftkeys;
     phone.name = name || phone.name;
     phone.number = number || phone.number;
+    phone.type = type;
 
     return await this.phoneRepository.save(phone);
   }

@@ -84,7 +84,11 @@ void (async function bootstrap() {
     uploads: false,
     debug: true,
     tracing: true,
-    subscriptions: "/api/graphql"
+    subscriptions: "/api/graphql",
+    formatError: error => {
+      console.warn(error);
+      return error;
+    }
   });
 
   server.applyMiddleware({ app, path: "/api/graphql" });

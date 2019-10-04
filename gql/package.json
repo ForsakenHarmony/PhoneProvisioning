@@ -33,7 +33,6 @@
     "typeorm-typedi-extensions": "^0.2.3"
   },
   "devDependencies": {
-    "@types/graphql": "^14.5.0",
     "@types/node": "^12.7.8",
     "nodemon": "^1.19.3",
     "pkg": "^4.4.0",

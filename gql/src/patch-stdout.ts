@@ -28,7 +28,6 @@ if (!existsSync(logsFolder)) {
   mkdirSync(logsFolder);
 }
 const logFileName = `log_${(new Date()).toISOString().replace(/:/g, "-")}.txt`;
-console.log(logFileName);
 const logFileStream = createWriteStream(join(logsFolder, logFileName));
 
 patchWrite(process.stdout, logFileStream);

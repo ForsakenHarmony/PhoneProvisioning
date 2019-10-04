@@ -43,7 +43,7 @@ async function execAndParseArp() {
 }
 
 async function ping(ip: string) {
-  // console.log("ping", ip);
+  console.log("[arp-helper] [ping]", ip);
   try {
     await execProm(`ping -4 -w 100 -n 1 ${ip}`);
   } catch (e) {}

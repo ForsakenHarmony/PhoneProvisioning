@@ -1,3 +1,5 @@
+import "./patch-stdout";
+
 import "reflect-metadata";
 import "sqlite3";
 import { Container } from "typedi";
@@ -19,12 +21,19 @@ import { CompanyResolver } from "./resolvers/companyResolver";
 import { PhoneResolver } from "./resolvers/phoneResolver";
 import { SoftkeyResolver } from "./resolvers/softkeyResolver";
 
+// import { ResolveTimeMiddleware } from "./middlewares/resolve-time";
+import { ErrorLoggerMiddleware } from "./middlewares/error-logger";
+
 import { initial1559140753150 } from "./migrations/1559140753150-initial";
 import { dndSoftkeys1565015427830 } from "./migrations/1565015427830-dnd-softkeys";
 import { phoneType1569939955129 } from "./migrations/1569939955129-phone-type";
 
 // register 3rd party IOC container
 ormUseContainer(Container);
+
+process.on('uncaughtException', function(err) {
+  console.error((err && err.stack) ? err.stack : err);
+});
 
 void (async function bootstrap() {
   process.env.NODE_ENV = process.env.NODE_ENV || "production";
@@ -36,7 +45,7 @@ void (async function bootstrap() {
     type: "sqlite",
     database: "database.sqlite",
     logger: "advanced-console",
-    logging: ["error", "warn", "migration"],
+    logging: ["error", "warn", "info", "schema", "migration", "log"],
     synchronize: !isProd,
     entities: [Company, Phone, Softkey, TopSoftkey],
     migrations: [
@@ -44,7 +53,7 @@ void (async function bootstrap() {
       dndSoftkeys1565015427830,
       phoneType1569939955129
     ],
-    migrationsRun: isProd
+    migrationsRun: true, // isProd
     // dropSchema: true,
   };
 
@@ -58,7 +67,8 @@ void (async function bootstrap() {
     resolvers: [CompanyResolver, PhoneResolver, SoftkeyResolver],
     emitSchemaFile: !isProd && "../schema.graphql",
     container: Container,
-    pubSub
+    pubSub,
+    globalMiddlewares: [ErrorLoggerMiddleware /*, ResolveTimeMiddleware*/],
   });
 
   const app = express();

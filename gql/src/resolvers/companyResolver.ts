@@ -99,7 +99,7 @@ export class CompanyResolver {
     const phoneResolver = Container.get(PhoneResolver);
     await Promise.all(
       newPhones.map(async phone =>
-        phoneResolver.importConfigFromPhone(phone.id)
+        phoneResolver.importConfigFromPhone(phone.id).catch(() => {})
       )
     );
 
@@ -126,6 +126,7 @@ export class CompanyResolver {
             idx: phone.idx,
             name: phone.name,
             number: phone.number,
+            type: phone.type,
             mac: phone.mac,
             skipContacts: phone.skipContacts,
             softkeys: softkeys.map(

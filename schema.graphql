@@ -59,7 +59,7 @@ type Phone {
 }
 
 input PhoneInput {
-  id: String!
+  id: String
   name: String!
   number: String!
   mac: String

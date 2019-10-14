@@ -1,0 +1,28 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build",
+
+    "noUnusedParameters": false,
+
+    "lib": ["es6", "dom", "esnext"],
+
+    "noEmit": true,
+
+    "jsx": "preserve",
+    "jsxFactory": "preact.h",
+
+    "baseUrl": ".",
+    "paths": { "*": ["typings/*"] },
+
+    "plugins": [
+      {
+        "name": "ts-graphql-plugin",
+        "schema": { "http": { "url": "http://localhost:4000" } },
+        "tag": "gql"
+      }
+    ]
+  },
+  "files": ["src/index.ts"]
+}

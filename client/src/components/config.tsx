@@ -8,18 +8,20 @@ import {
   removeCompany as removeCompanyMut,
   setActiveCompany as setActiveCompanyMut
 } from "../gql/index.gql";
-import { Company } from "./company";
+import { CompanyView } from "./companyView";
 import { Download, Trash, Upload } from "preact-feather";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { useQuery, useMutation } from "@pql/boost";
+import { Company } from "../gql/types";
+import { Obj } from "../utils";
 
-function useFilePicker(cb) {
+function useFilePicker(cb: (files: FileList) => void) {
   // const [open, setOpen] = useState(() => {});
   return useCallback(() => {
     const input = document.createElement("input");
     input.setAttribute("type", "file");
     input.onchange = () => {
-      cb(input.files);
+      cb(input.files!);
     };
     input.click();
     // setOpen(input.click.bind(input));
@@ -39,7 +41,7 @@ function useFilePicker(cb) {
   // return open;
 }
 
-function download(data, name) {
+function download(data: BlobPart, name: string) {
   const blob = new Blob([data], {
     type: "application/json",
     endings: "transparent"
@@ -53,7 +55,7 @@ function download(data, name) {
   setTimeout(() => URL.revokeObjectURL(url), 30 * 1000);
 }
 
-function removeTypename(thing) {
+function removeTypename(thing: Obj): Obj {
   if (Array.isArray(thing)) return thing.map(removeTypename);
 
   if (typeof thing !== "object") return thing;
@@ -73,7 +75,7 @@ function removeTypename(thing) {
 export function Config() {
   const [selectedCompany, setSelectedCompany] = useState("");
 
-  const [{ data, error, fetching }, refetch] = useQuery({ query: companies });
+  const [{ data, fetching }, refetch] = useQuery({ query: companies });
 
   const [{}, setActive] = useMutation(setActiveCompanyMut);
   const [{}, addC] = useMutation(addCompanyMut);
@@ -82,7 +84,7 @@ export function Config() {
   const [{}, removeC] = useMutation(removeCompanyMut);
 
   const setSelected = useCallback(
-    id => {
+    (id: string) => {
       if (id === selectedCompany) return;
       setSelectedCompany(selected => {
         if (![selected, "", "new"].includes(id)) {
@@ -100,14 +102,14 @@ export function Config() {
       data &&
       (selectedCompany === "" ||
         (selectedCompany !== "new" &&
-          !data.companies.find(c => c.id === selectedCompany)))
+          !data.companies.find((c: Company) => c.id === selectedCompany)))
     ) {
       setSelected((data.companies[0] || {}).id || "new");
     }
   }, [selectedCompany, data, fetching, data]);
 
   const createNew = useCallback(
-    async name => {
+    async (name: string) => {
       const {
         data: { addCompany }
       } = await addC({ name });
@@ -161,14 +163,14 @@ export function Config() {
           <select
             class="form-select"
             value={selectedCompany}
-            onChange={e => setSelected(e.target.value)}
+            onChange={e => setSelected((e.target! as HTMLInputElement).value)}
           >
             {!data ? (
               <option>
                 <Text id="loading" />
               </option>
             ) : (
-              data.companies.map(c => <option value={c.id}>{c.name}</option>)
+              data.companies.map((c: Company) => <option value={c.id}>{c.name}</option>)
             )}
             <option value={"new"}>
               <Text id="new_company" />
@@ -204,7 +206,7 @@ export function Config() {
         </section>
         <section class="navbar-section" />
       </header>
-      <Company id={selectedCompany} addCompany={createNew} />
+      <CompanyView id={selectedCompany} addCompany={createNew} />
     </div>
   );
 }

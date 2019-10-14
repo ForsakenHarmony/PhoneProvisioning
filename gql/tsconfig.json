@@ -1,37 +1,20 @@
 {
+  "extends": "../tsconfig",
   "compilerOptions": {
-    "esModuleInterop": true,
-    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "dist",
 
-    "newLine": "lf",
-    "target": "esnext",
     "module": "commonjs",
     "sourceMap": false,
-    "outDir": "dist",
     "declaration": false,
 
-    "jsx": "react",
-    "jsxFactory": "h",
-
-    "lib": ["es6", "dom", "esnext"],
-
-    "experimentalDecorators": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "strict": true,
-    "allowUnreachableCode": false,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "resolveJsonModule": true,
+
     "emitDecoratorMetadata": true,
-    "incremental": true,
 
     "baseUrl": ".",
     "paths": { "*": ["typings/*"] }
   },
-  "include": ["src/**/*.ts", "typings/**/*.d.ts"],
   "files": [
     "src/index.ts"
   ]

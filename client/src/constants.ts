@@ -105,8 +105,11 @@ export const EnumToTopSoftkey = {
 };
 
 export const topSoftkeyTypes = Object.values(EnumToTopSoftkey);
-export const TopSoftkeyToEnum = Object.keys(EnumToTopSoftkey).reduce(
-  (acc, val) => Object.assign(acc, { [EnumToTopSoftkey[val]]: val }),
+export const TopSoftkeyToEnum = (Object.keys(EnumToTopSoftkey) as (keyof typeof EnumToTopSoftkey)[]).reduce(
+  (acc, val) =>
+    Object.assign(acc, {
+      [EnumToTopSoftkey[val]]: val
+    }),
   {}
 );
 
@@ -139,7 +142,10 @@ export const EnumToSoftkey = {
 };
 
 export const softkeyTypes = Object.values(EnumToSoftkey);
-export const SoftkeyToEnum = Object.keys(EnumToSoftkey).reduce(
-  (acc, val) => Object.assign(acc, { [EnumToSoftkey[val]]: val }),
+export const SoftkeyToEnum = (Object.keys(EnumToSoftkey) as (keyof typeof EnumToSoftkey)[]).reduce(
+  (acc, val) =>
+    Object.assign(acc, {
+      [EnumToSoftkey[val]]: val
+    }),
   {}
 );

@@ -1,7 +1,8 @@
-import { assign, select } from "./util";
+import { assign, Obj, select } from "./util";
 import translate from "./translate";
 import { Text } from "../components/text";
 import { toChildArray } from "preact";
+import { IntlContext } from "../components/intl-provider";
 
 /** Translates the property values in an Object, returning a copy.
  *	**Note:** By default, `String` keys will be treated as Intl ID's.
@@ -14,8 +15,12 @@ import { toChildArray } from "preact";
  *	@param {Boolean} [onlyTextNodes=false]	Only process `<Text />` values
  *	@returns {Object} translatedProps
  */
-export default function translateMapping(props, intl, onlyTextNodes) {
-  let out = {};
+export default function translateMapping(
+  props: Obj | null | string,
+  intl: IntlContext["intl"],
+  onlyTextNodes: boolean
+) {
+  let out: Obj = {};
   intl = intl || {};
   props = select(props);
   for (let name in props) {

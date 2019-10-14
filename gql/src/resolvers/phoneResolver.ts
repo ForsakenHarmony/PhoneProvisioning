@@ -283,7 +283,7 @@ export class PhoneResolver {
 
     phone.softkeys = softkeys;
     phone.topSoftkeys = topSoftkeys;
-    phone.name = name || phone.name;
+    phone.name = phone.name && phone.name !== '?' ? phone.name : name;
     phone.number = number || phone.number;
     phone.type = type;
 

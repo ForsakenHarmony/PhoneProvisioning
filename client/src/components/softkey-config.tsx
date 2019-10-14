@@ -9,16 +9,26 @@ import {
   TopSoftkeyToEnum,
   topSoftkeyTypes
 } from "../constants";
-import { isLabelDisabled, isValueDisabled } from "../utils";
+import { isLabelDisabled, isValueDisabled, Obj } from "../utils";
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { Softkey, TopSoftkey } from "../gql/types";
+import { VNode } from "preact";
 
-export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
+interface SoftkeyPopoverProps<Top extends boolean> {
+  softkey: PickSoftkey<Top>,
+  set: (softkey: PickSoftkey<Top>) => void,
+  remove?: (id: string) => void,
+  isNew?: boolean,
+  loading: boolean,
+}
+
+export const createSoftkeyPopover = <Top extends boolean>(types: string[], ValToEnum: Obj, EnumToVal: Obj) => ({
   softkey,
   set = () => {},
   remove = () => {},
   isNew = false,
   loading = false
-}) => {
+}: SoftkeyPopoverProps<Top>) => {
   const { id, type, label, value } = softkey;
 
   const [localSoftkey, updateSoftkey] = useState({ type, label, value });
@@ -28,16 +38,16 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
   }, [type, label, value]);
 
   const submit = useCallback(
-    e => {
+    (e: Event) => {
       e.preventDefault();
-      set(localSoftkey);
+      set(localSoftkey as unknown as PickSoftkey<Top>);
     },
     [localSoftkey]
   );
 
   const update = useCallback(
-    field => {
-      return e => updateSoftkey(s => ({ ...s, [field]: e.target.value }));
+      (field: string) => {
+      return (e: Event) => updateSoftkey(s => ({ ...s, [field]: (e.target! as HTMLInputElement).value }));
     },
     [updateSoftkey]
   );
@@ -54,7 +64,7 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
                 value={localSoftkey.type}
                 onChange={update("type")}
               >
-                {types.map(type => (
+                {types.map((type: string) => (
                   <option value={ValToEnum[type]}>
                     <Text id={`softkey.${type}`} />
                   </option>
@@ -70,7 +80,7 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
                     id={`${id}.label`}
                     value={localSoftkey.label}
                     onChange={update("label")}
-                    placeholder={<Text id="label" />}
+                    placeholder={<Text id="label" /> as unknown as string}
                   />
                 </Localizer>
               </div>
@@ -84,7 +94,7 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
                     id={`${id}.value`}
                     value={localSoftkey.value}
                     onChange={update("value")}
-                    placeholder={<Text id="value" />}
+                    placeholder={<Text id="value" /> as unknown as string}
                   />
                 </Localizer>
               </div>
@@ -117,26 +127,37 @@ export const createSoftkeyPopover = (types, ValToEnum, EnumToVal) => ({
   );
 };
 
-export const TopSoftkeyPopover = createSoftkeyPopover(
+export const TopSoftkeyPopover = createSoftkeyPopover<true>(
   topSoftkeyTypes,
   TopSoftkeyToEnum,
   EnumToTopSoftkey
 );
-export const SoftkeyPopover = createSoftkeyPopover(
+export const SoftkeyPopover = createSoftkeyPopover<false>(
   softkeyTypes,
   SoftkeyToEnum,
   EnumToSoftkey
 );
 
-export const SoftkeyConfig = ({
+type PickSoftkey<T extends boolean> = T extends true ? TopSoftkey : Softkey;
+
+interface SoftkeyConfigProps<Top extends boolean> {
+  softkey: PickSoftkey<Top>,
+  set: (softkey: PickSoftkey<Top>) => void,
+  remove: (id: string) => void,
+  loading: boolean,
+  isTop: Top,
+  handle: VNode<any> | null,
+}
+
+export const SoftkeyConfig = <Top extends boolean>({
   softkey,
   set,
   remove,
-  isTop = false,
+  isTop,
   loading,
   handle,
   ...props
-}) => {
+}: SoftkeyConfigProps<Top>) => {
   const EnumToVal = isTop ? EnumToTopSoftkey : EnumToSoftkey;
   const [popover, setPopover] = useState(false);
   return (
@@ -144,11 +165,11 @@ export const SoftkeyConfig = ({
       {handle}
       <div class="tile-content">
         <div class="tile-title text-bold">
-          {softkey.label || <Text id={`softkey.${EnumToVal[softkey.type]}`} />}
+          {softkey.label || <Text id={`softkey.${EnumToVal[softkey.type as unknown as keyof typeof EnumToVal]}`} />}
         </div>
         <div class="tile-subtitle">
           {(softkey.label && (
-            <Text id={`softkey.${EnumToVal[softkey.type]}`} />
+            <Text id={`softkey.${EnumToVal[softkey.type as unknown as keyof typeof EnumToVal]}`} />
           )) ||
             "\u00A0"}{" "}
           {softkey.value && `[ ${softkey.value} ]`}
@@ -167,15 +188,15 @@ export const SoftkeyConfig = ({
         {popover &&
           (isTop ? (
             <TopSoftkeyPopover
-              softkey={softkey}
-              set={set}
+              softkey={softkey as any}
+              set={set as any}
               remove={remove}
               loading={loading}
             />
           ) : (
             <SoftkeyPopover
-              softkey={softkey}
-              set={set}
+              softkey={softkey as any}
+              set={set as any}
               remove={remove}
               loading={loading}
             />

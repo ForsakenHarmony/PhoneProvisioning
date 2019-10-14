@@ -11,6 +11,9 @@ export default (config, env) => {
   //   }),
   // );
 
+  config.resolve.alias["typeorm"] = "typeorm/typeorm-model-shim";
+  config.resolve.alias["type-graphql"] = "type-graphql/dist/browser-shim";
+
   if (!env.isProd) {
     config.devServer.proxy = {
       '/api': {

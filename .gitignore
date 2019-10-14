@@ -10,4 +10,4 @@ gql/dist
 *.exe
 *.sqlite
 
-node_sqlite3.node
+release/node_sqlite3.node

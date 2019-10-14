@@ -1,7 +1,21 @@
-import { h, Component } from "preact";
-import { assign, deepAssign } from "../lib/util";
+import { Component, RenderableProps } from "preact";
+import { assign, deepAssign, Obj } from "../lib/util";
 
 const URL_FLAG = /[?&#]intl=show/;
+
+export interface Props {
+  scope?: any;
+  definition?: Obj;
+  mark?: boolean;
+}
+
+export interface IntlContext {
+  intl: {
+    scope?: string;
+    dictionary?: Obj;
+    mark?: boolean;
+  };
+}
 
 /** `<IntlProvider>` is a nestable internationalization definition provider.
  *	It exposes an Intl scope & definition into the tree,
@@ -30,10 +44,10 @@ const URL_FLAG = /[?&#]intl=show/;
  *	// This will render the text:
  *	"Le Feux"
  */
-export class IntlProvider extends Component {
+export class IntlProvider extends Component<Props> {
   getChildContext() {
     let { scope, definition, mark } = this.props,
-      intl = assign({}, this.context.intl || {});
+      intl: IntlContext["intl"] = assign({}, this.context.intl || {});
 
     // set active scope for the tree if given
     if (scope) intl.scope = scope;
@@ -53,7 +67,7 @@ export class IntlProvider extends Component {
     return { intl };
   }
 
-  render({ children }) {
+  render({ children }: RenderableProps<Props>) {
     return children;
   }
 }

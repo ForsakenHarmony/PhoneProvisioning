@@ -1,5 +1,11 @@
-import { h } from "preact";
+import { h, RenderableProps, VNode } from "preact";
 import delve from "dlv";
+import { IntlContext } from "./intl-provider";
+
+interface Props {
+  value: VNode<any> | null;
+  id: string;
+}
 
 /** Highlight/colorize the i18n'd node if `mark` is set on `intl` in context.  If not, just returns `value`
  *
@@ -7,7 +13,10 @@ import delve from "dlv";
  *	@param {String|VNode} value	The l10n'd text/vnode to highlight or pass through
  *	@param {string} id	The key used to lookup the value in the intl dictionary
  */
-export function HighlightI18N({ value, id }, { intl }) {
+export function HighlightI18N(
+  { value, id }: RenderableProps<Props>,
+  { intl }: IntlContext
+): VNode<any> | null {
   if (intl && intl.mark) {
     const dictionaryKey = `dictionary${
       intl && intl.scope ? `.${intl.scope}` : ""

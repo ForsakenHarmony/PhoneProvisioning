@@ -1,4 +1,4 @@
-import { company, phoneStatus } from "../gql/index.gql";
+import { company, CompanyQuery, CompanyQueryArgs, phoneStatus, PhoneStatusSubscription } from "../gql/index.gql";
 import { Localizer, Text } from "./i18n";
 import { PhoneConfig } from "./phone-config-view";
 import { CompanyPhones } from "./company-phones";
@@ -7,11 +7,16 @@ import clsx from "clsx";
 import { useSubscriptionWithQuery } from "@pql/boost";
 import { useCallback, useState } from "preact/hooks";
 
-export function Company({ id, addCompany }) {
+interface Props {
+  id: string;
+  addCompany: Function;
+}
+
+export function CompanyView({ id, addCompany }: Props) {
   const [newName, setNewName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [{ data, fetching }] = useSubscriptionWithQuery(
+  const [{ data, fetching }] = useSubscriptionWithQuery<PhoneStatusSubscription, CompanyQuery, CompanyQueryArgs, {}>(
     {
       query: {
         query: company,
@@ -25,14 +30,14 @@ export function Company({ id, addCompany }) {
       const phone = data.company.phones.find(
         phone => phone.id === next.phoneStatus.phone.id
       );
-      if (phone.status !== next.phoneStatus.phone.status)
+      if (phone && phone.status !== next.phoneStatus.phone.status)
         phone.status = next.phoneStatus.phone.status;
       return data;
     }
   );
 
   const createNew = useCallback(
-    e => {
+    (e: Event) => {
       e.preventDefault();
       setLoading(true);
       addCompany(newName).then(() => setLoading(false));
@@ -67,9 +72,9 @@ export function Company({ id, addCompany }) {
                     class="form-input"
                     type="text"
                     id="newName"
-                    placeholder={<Text id="name" />}
+                    placeholder={<Text id="name" /> as unknown as string}
                     value={newName}
-                    onChange={e => setNewName(e.target.value)}
+                    onChange={(e: Event) => setNewName((e.target! as HTMLInputElement).value)}
                   />
                 </Localizer>
               </div>
@@ -89,8 +94,9 @@ export function Company({ id, addCompany }) {
           data.company.phones
             .filter(p => p.mac)
             .map((p, id) => (
+              // @ts-ignore custom attribute
               <div bp="margin-right">
-                <PhoneConfig phone={p} id={id} company={data.company} />
+                <PhoneConfig phone={p}/>
               </div>
             ))
         ) : (

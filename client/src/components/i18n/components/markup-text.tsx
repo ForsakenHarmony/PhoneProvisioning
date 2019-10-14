@@ -1,5 +1,4 @@
-import { h } from "preact";
-import { Text } from "./text";
+import { Text, Props as TextProps } from "./text";
 import { Localizer } from "./localizer";
 import { HighlightI18N } from "./highlight-i18n";
 
@@ -42,7 +41,7 @@ import { HighlightI18N } from "./highlight-i18n";
  *	// ..produces the vnode:
  *	<div/>
  */
-export function MarkupText(props) {
+export function MarkupText(props: TextProps) {
   return (
     <Localizer>
       <Html html={<Text {...props} />} id={props.id} />
@@ -50,7 +49,7 @@ export function MarkupText(props) {
   );
 }
 
-function Html({ html, id }) {
+function Html({ html, id }: { html?: any; id: string }) {
   let value = !html ? (
     html
   ) : typeof html === "string" ? (

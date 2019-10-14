@@ -15,20 +15,22 @@ function patchWrite(stream: WritableStream, interceptor: WritableStream) {
   const oldWrite = stream.write.bind(stream);
 
   const newWrite: WriteFn = function write(...args: any[]): boolean {
-    return interceptor.write.apply(interceptor, args as WriteArgs) && oldWrite.apply(stream, args as WriteArgs);
+    return interceptor.write.apply(interceptor, args as WriteArgs) || oldWrite.apply(stream, args as WriteArgs);
   };
 
   stream.write = newWrite;
 }
 
-const cwd = process.cwd();
+if ((process.env.NODE_ENV || "production") === "production") {
+  const cwd = process.cwd();
 
-const logsFolder = join(cwd, "logs");
-if (!existsSync(logsFolder)) {
-  mkdirSync(logsFolder);
+  const logsFolder = join(cwd, "logs");
+  if (!existsSync(logsFolder)) {
+    mkdirSync(logsFolder);
+  }
+  const logFileName = `log_${(new Date()).toISOString().replace(/:/g, "-")}.txt`;
+  const logFileStream = createWriteStream(join(logsFolder, logFileName));
+
+  patchWrite(process.stdout, logFileStream);
+  patchWrite(process.stderr, logFileStream);
 }
-const logFileName = `log_${(new Date()).toISOString().replace(/:/g, "-")}.txt`;
-const logFileStream = createWriteStream(join(logsFolder, logFileName));
-
-patchWrite(process.stdout, logFileStream);
-patchWrite(process.stderr, logFileStream);

@@ -1,6 +1,14 @@
-import { h, toChildArray } from "preact";
+import { RenderableProps, toChildArray } from "preact";
 import translate from "../lib/translate";
 import { HighlightI18N } from "./highlight-i18n";
+import { Obj } from "../lib/util";
+import { IntlContext } from "./intl-provider";
+
+export interface Props {
+  id: string;
+  fields?: Obj;
+  plural?: number;
+}
 
 /** `<Text>` renders internationalized text.
  *	It attempts to look up translated values from a dictionary in context.
@@ -39,7 +47,10 @@ import { HighlightI18N } from "./highlight-i18n";
  *	// ..produces the text:
  *	"Le Feux"
  */
-export function Text({ id, children, plural, fields }, { intl }) {
+export function Text(
+  { id, children, plural, fields }: RenderableProps<Props>,
+  { intl }: IntlContext
+) {
   let fallback = toChildArray(children)[0];
 
   let value = translate(

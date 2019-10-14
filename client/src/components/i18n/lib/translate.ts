@@ -1,6 +1,7 @@
 import delve from "dlv";
-import { defined } from "./util";
+import { defined, Obj } from "./util";
 import template from "./template";
+import { VNode } from "preact";
 
 /** Attempts to look up a translated value from a given dictionary.
  *  Also supports json templating using the format: {{variable}}
@@ -16,13 +17,13 @@ import template from "./template";
  *	@returns {String} translated
  */
 export default function translate(
-  id,
-  scope,
-  dictionary,
-  fields,
-  plural,
-  fallback
-) {
+  id: string,
+  scope?: string,
+  dictionary?: Obj,
+  fields: Obj = {},
+  plural?: number,
+  fallback?: VNode<any> | null
+): VNode<any> | null {
   if (scope) id = scope + "." + id;
 
   let value = dictionary && delve(dictionary, id);
@@ -43,5 +44,7 @@ export default function translate(
     }
   }
 
-  return (value && template(value, fields)) || fallback || null;
+  return ((value && template(value, fields)) || fallback || null) as VNode<
+    any
+  > | null;
 }

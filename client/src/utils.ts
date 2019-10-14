@@ -1,5 +1,5 @@
-export function isLabelDisabled(a) {
-  switch (a) {
+export function isLabelDisabled(type: string) {
+  switch (type) {
     case "":
     case "dnd":
     case "xfer":
@@ -18,8 +18,8 @@ export function isLabelDisabled(a) {
   }
 }
 
-export function isValueDisabled(a) {
-  switch (a) {
+export function isValueDisabled(type: string) {
+  switch (type) {
     case "":
     case "line":
     case "dnd":
@@ -48,8 +48,8 @@ export function isValueDisabled(a) {
   }
 }
 
-export function isLineDisabled(a) {
-  switch (a) {
+export function isLineDisabled(type: string) {
+  switch (type) {
     case "":
     case "dnd":
     case "xml":
@@ -79,3 +79,9 @@ export function isLineDisabled(a) {
       return false;
   }
 }
+
+export interface EventWithValue extends Event {
+  target: HTMLInputElement;
+}
+
+export type Obj = { [k: string]: any };

@@ -1,5 +1,6 @@
-import { cloneElement, toChildArray } from "preact";
+import { cloneElement, RenderableProps, toChildArray } from "preact";
 import translateMapping from "../lib/translate-mapping";
+import { IntlContext } from "./intl-provider";
 
 /** `<Localizer />` is a Compositional Component.
  *	It "renders" out any `<Text />` values in its child's props.
@@ -25,9 +26,13 @@ import translateMapping from "../lib/translate-mapping";
  *	// produces:
  *	<abbr title="Open Source Software">OSS</abbr>
  */
-export function Localizer({ children }, { intl }) {
+export function Localizer(
+  { children }: RenderableProps<{}>,
+  { intl }: IntlContext
+) {
   let child = toChildArray(children)[0];
   return (
-    child && cloneElement(child, translateMapping(child.props, intl, true))
+    child &&
+    cloneElement(child, translateMapping(child.props as any, intl, true))
   );
 }

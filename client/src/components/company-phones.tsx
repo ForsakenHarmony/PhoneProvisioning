@@ -3,38 +3,54 @@ import { DnD } from "./dnd";
 import { PhoneView } from "./phone-view";
 import {
   addPhone,
+  AddPhoneMutationArgs,
   removePhone,
+  RemovePhoneMutationArgs,
   movePhones,
+  MovePhoneMutationArgs,
   transferConfigToAll,
+  TransferConfigToAllMutationArgs,
   updatePhone,
-  findPhones
+  UpdatePhoneMutationArgs,
+  findPhones,
+  FindPhonesMutationArgs
 } from "../gql/index.gql";
 import clsx from "clsx";
 import { useMutation } from "@pql/boost";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState
-} from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import genUUID from "uuid/v4";
+import { Company, Phone } from "../gql/types";
+import { EventWithValue } from "../utils";
 
-export function CompanyPhones({ company }) {
-  const [{ fetching: addFetching }, addPhoneMut] = useMutation(addPhone);
-  const [{ fetching: removeFetching }, removePhoneMut] = useMutation(
-    removePhone
-  );
-  const [{ fetching: moveFetching }, movePhonesMut] = useMutation(movePhones);
-  const [{ fetching: transferFetching }, transferMut] = useMutation(
-    transferConfigToAll
-  );
-  const [{ fetching: updateFetching }, updatePhoneMut] = useMutation(
-    updatePhone
-  );
-  const [{ fetching: findFetching }, findPhonesMut] = useMutation(
-    findPhones
-  );
+interface Props {
+  company: Company;
+}
+
+export function CompanyPhones({ company }: Props) {
+  const [{ fetching: addFetching }, addPhoneMut] = useMutation<
+    any,
+    AddPhoneMutationArgs
+  >(addPhone);
+  const [{ fetching: removeFetching }, removePhoneMut] = useMutation<
+    any,
+    RemovePhoneMutationArgs
+  >(removePhone);
+  const [{ fetching: moveFetching }, movePhonesMut] = useMutation<
+    any,
+    MovePhoneMutationArgs
+  >(movePhones);
+  const [{ fetching: transferFetching }, transferMut] = useMutation<
+    any,
+    TransferConfigToAllMutationArgs
+  >(transferConfigToAll);
+  const [{ fetching: updateFetching }, updatePhoneMut] = useMutation<
+    any,
+    UpdatePhoneMutationArgs
+  >(updatePhone);
+  const [{ fetching: findFetching }, findPhonesMut] = useMutation<
+    any,
+    FindPhonesMutationArgs
+  >(findPhones);
 
   const loading =
     addFetching ||
@@ -53,39 +69,49 @@ export function CompanyPhones({ company }) {
   const [error, setError] = useState(null);
 
   const [skipThing, setSkipThing] = useState(false);
-  useEffect(async () => {
-    if (!phoneState.name || !phoneState.number || addFetching || skipThing)
-      return;
-    company.phones.push(phoneState);
-    setSkipThing(true);
-    try {
-      setState({
-        id: genUUID(),
-        name: null,
-        mac: null,
-        number: null
-      });
-      await addPhoneMut({
-        companyId: company.id,
-        phone: phoneState
-      });
-      setError(null);
-    } catch (e) {
-      setError(e);
-    } finally {
-      setSkipThing(false);
+  useEffect(() => {
+    async function addPhone() {
+      if (!phoneState.name || !phoneState.number || addFetching || skipThing)
+        return;
+      company.phones.push((phoneState as unknown) as Phone);
+      setSkipThing(true);
+      try {
+        setState({
+          id: genUUID(),
+          name: null,
+          mac: null,
+          number: null
+        });
+        const { number, name, mac, id } = phoneState;
+        await addPhoneMut({
+          companyId: company.id,
+          phone: {
+            id,
+            mac: mac!,
+            name: name!,
+            number: number!,
+            skipContacts: false
+          }
+        });
+        setError(null);
+      } catch (e) {
+        setError(e);
+      } finally {
+        setSkipThing(false);
+      }
     }
+    addPhone().catch(e => console.error("Everything is fucked", e));
   }, [phoneState, company.id, addFetching, error]);
 
   const updateState = useCallback(
-    (field, e) => {
+    (field: string, e: EventWithValue) => {
       setState(s => ({ ...s, [field]: e.target.value }));
     },
     [setState]
   );
 
   const remove = useCallback(
-    id => {
+    (id: string) => {
       removePhoneMut({ id })
         .then(() => setError(null))
         .catch(e => setError(e));
@@ -94,8 +120,9 @@ export function CompanyPhones({ company }) {
   );
 
   const update = useCallback(
-    (id, field, e) => {
+    (id: string, field: "name" | "number" | "mac", e: EventWithValue) => {
       const phone = company.phones.find(p => p.id === id);
+      if (!phone) return;
       phone[field] = e.target.value;
       if (!phone) return;
       updatePhoneMut({
@@ -114,7 +141,7 @@ export function CompanyPhones({ company }) {
   );
 
   const move = useCallback(
-    async (from, to) => {
+    async (from: string, to: string) => {
       const prev = company.phones;
       try {
         const next = company.phones.slice();
@@ -212,6 +239,7 @@ export function CompanyPhones({ company }) {
               />
             )}
             items={company.phones}
+            prop="id"
             onMove={move}
           />
         </table>
@@ -228,7 +256,7 @@ export function CompanyPhones({ company }) {
           className={clsx("btn btn-primary", { loading: loading })}
           onClick={find}
         >
-          <Text id="find_phones"/>
+          <Text id="find_phones" />
         </button>
       </div>
     </div>

@@ -1,5 +1,5 @@
-import { h } from "preact";
-import { IntlProvider } from "./components/intl-provider";
+import { AnyComponent, FunctionalComponent, h } from "preact";
+import { IntlProvider, Props as IntlProps } from "./components/intl-provider";
 
 /**
  * Higher-order function that creates an `<IntlProvider />` wrapper component for the given component.  It
@@ -16,12 +16,17 @@ import { IntlProvider } from "./components/intl-provider";
  *	@param [options.scope]			Nest `definition` under a root key, and set the active scope for the tree (essentially prefixing all `<Text />` keys).
  *	@param [options.definition={}]	Merge the given definition into the current intl definition, giving the *current* definition precedence (i.e., only adding keys, acting as defaults)
  */
-export function intl(Child, options) {
+export function intl(options: IntlProps): FunctionalComponent;
+export function intl(
+  Child: AnyComponent,
+  options: IntlProps
+): FunctionalComponent;
+export function intl(Child: AnyComponent | IntlProps, options?: IntlProps) {
   if (arguments.length < 2) {
-    options = Child;
-    return Child => intl(Child, options);
+    options = Child as IntlProps;
+    return (Child: AnyComponent) => intl(Child, options!);
   }
-  function IntlProviderWrapper(props) {
+  function IntlProviderWrapper(props: any) {
     return h(IntlProvider, options || {}, h(Child, props));
   }
 

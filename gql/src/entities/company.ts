@@ -14,7 +14,7 @@ export class Company {
   @Column()
   name!: string;
 
-  @Field(type => [Phone], { defaultValue: [] })
+  @Field(type => [Phone])
   @OneToMany(type => Phone, phone => phone.company, {
     lazy: true,
     cascade: true

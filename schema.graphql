@@ -6,7 +6,7 @@
 type Company {
   id: ID!
   name: String!
-  phones: [Phone!]
+  phones: [Phone!]!
 }
 
 input CompanyInput {

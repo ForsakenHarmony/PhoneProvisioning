@@ -253,6 +253,41 @@ export class PhoneResolver {
     return await this.companyRepository.save(company);
   }
 
+  @Mutation(returns => Company)
+  async copyTo(
+    @Arg("fromPhone", type => ID) phoneId: string,
+    @Arg("toPhones", type => [ID]) to: string[],
+  ): Promise<Company> {
+    const phone = await this.phoneRepository.findOneOrFail(phoneId, {
+      relations: ["topSoftkeys", "softkeys", "company"]
+    });
+    const company = await phone.company;
+    const topSoftkeys = (await phone.topSoftkeys).map(key => {
+      const newKey = Object.assign({}, key);
+      // @ts-ignore
+      delete newKey.id;
+      return newKey;
+    });
+    const softkeys = (await phone.softkeys).map(key => {
+      const newKey = Object.assign({}, key);
+      // @ts-ignore
+      delete newKey.id;
+      return newKey;
+    });
+    const phones = await company.phones;
+    phones
+      .filter(p => p.id !== phone.id && to.includes(p.id))
+      .forEach(phone => {
+        phone.softkeys = Promise.resolve(
+          this.softkeyRepository.create(softkeys)
+        );
+        phone.topSoftkeys = Promise.resolve(
+          this.topSoftkeyRepository.create(topSoftkeys)
+        );
+      });
+    return await this.companyRepository.save(company);
+  }
+
   @Mutation(returns => Boolean)
   async resetPhone(@Arg("phoneId", type => ID) id: string) {
     const api = await this.getPhoneApiById(id);

@@ -31,6 +31,7 @@ type Mutation {
   updateSoftkey(softkey: SoftkeyInput!, id: ID!): Softkey!
   removeSoftkey(id: ID!): Softkey!
   copyToAll(phoneId: ID!): Company!
+  copyTo(toPhones: [ID!]!, fromPhone: ID!): Company!
   resetPhone(phoneId: ID!): Boolean!
   importConfigFromPhone(id: ID!): Phone!
   transferConfigToPhone(phoneId: ID!): Boolean!

@@ -23,19 +23,9 @@ import {
   updateTopSoftkey as updateTopSoftkeyMut,
   moveSoftkey as moveSoftkeyMut,
   moveTopSoftkey as moveTopSoftkeyMut,
-  AddTopSoftkeyMutationArgs,
-  UpdateTopSoftkeyMutationArgs,
-  RemoveTopSoftkeyMutationArgs,
-  AddSoftkeyMutationArgs,
-  UpdateSoftkeyMutationArgs,
-  RemoveSoftkeyMutationArgs,
-  CopyToAllMutationArgs,
-  TransferConfigMutationArgs,
-  ImportFromPhoneMutationArgs,
-  MoveSoftkeyMutationArgs,
-  MoveTopSoftkeyMutationArgs, UpdatePhoneMutationArgs
 } from "../gql/index.gql";
 import {
+  PickSoftkey, PickSoftkeyInput,
   SoftkeyConfig,
   SoftkeyPopover,
   TopSoftkeyPopover
@@ -44,7 +34,21 @@ import {
 import { useMutation } from "@pql/boost";
 import { useCallback, useState } from "preact/hooks";
 import { DnD } from "./dnd";
-import { CommonSoftkey, Phone, SoftkeyInput, SoftkeyTypes, TopSoftkeyInput, TopSoftkeyTypes } from "../gql/types";
+import { VNode } from "preact";
+import { company_company_phones } from "../gql/gen/company";
+import { SoftkeyInput, SoftkeyTypes, TopSoftkeyInput, TopSoftkeyTypes } from "../gql/gen/globalTypes";
+import { addTopSoftkeyVariables } from "../gql/gen/addTopSoftkey";
+import { updateTopSoftkeyVariables } from "../gql/gen/updateTopSoftkey";
+import { removeTopSoftkeyVariables } from "../gql/gen/removeTopSoftkey";
+import { addSoftkeyVariables } from "../gql/gen/addSoftkey";
+import { updateSoftkeyVariables } from "../gql/gen/updateSoftkey";
+import { removeSoftkeyVariables } from "../gql/gen/removeSoftkey";
+import { copyToAllVariables } from "../gql/gen/copyToAll";
+import { transferConfigVariables } from "../gql/gen/transferConfig";
+import { importFromPhoneVariables } from "../gql/gen/importFromPhone";
+import { moveSoftkeyVariables } from "../gql/gen/moveSoftkey";
+import { moveTopSoftkeyVariables } from "../gql/gen/moveTopSoftkey";
+import { updatePhoneVariables } from "../gql/gen/updatePhone";
 
 function useManagedMutation<Vars extends Array<any>, MutVars>(
   statusSetter: (status: boolean) => void,
@@ -70,7 +74,7 @@ function useManagedMutation<Vars extends Array<any>, MutVars>(
 }
 
 interface Props {
-  phone: Phone,
+  phone: company_company_phones,
 }
 
 export function PhoneConfig({ phone }: Props) {
@@ -80,27 +84,27 @@ export function PhoneConfig({ phone }: Props) {
   const [transferring, setTransferring] = useState(false);
   const [error, setError] = useState(null);
 
-  const [{}, addTopSoftkeyM] = useMutation<any, AddTopSoftkeyMutationArgs>(addTopSoftkeyMut);
-  const [{}, updateTopSoftkeyM] = useMutation<any, UpdateTopSoftkeyMutationArgs>(updateTopSoftkeyMut);
-  const [{}, removeTopSoftkeyM] = useMutation<any, RemoveTopSoftkeyMutationArgs>(removeTopSoftkeyMut);
-  const [{}, addSoftkeyM] = useMutation<any, AddSoftkeyMutationArgs>(addSoftkeyMut);
-  const [{}, updateSoftkeyM] = useMutation<any, UpdateSoftkeyMutationArgs>(updateSoftkeyMut);
-  const [{}, removeSoftkeyM] = useMutation<any, RemoveSoftkeyMutationArgs>(removeSoftkeyMut);
-  const [{}, copyToAllM] = useMutation<any, CopyToAllMutationArgs>(copyToAllMut);
-  const [{}, transferConfigM] = useMutation<any, TransferConfigMutationArgs>(transferConfigMut);
-  const [{}, importConfig] = useMutation<any, ImportFromPhoneMutationArgs>(importFromPhone);
-  const [{}, moveSoftkey] = useMutation<any, MoveSoftkeyMutationArgs>(moveSoftkeyMut);
-  const [{}, moveTopSoftkey] = useMutation<any, MoveTopSoftkeyMutationArgs>(moveTopSoftkeyMut);
-  const [{ fetching: updateFetching }, updatePhone] = useMutation<any, UpdatePhoneMutationArgs>(
+  const [{}, addTopSoftkeyM] = useMutation<any, addTopSoftkeyVariables>(addTopSoftkeyMut);
+  const [{}, updateTopSoftkeyM] = useMutation<any, updateTopSoftkeyVariables>(updateTopSoftkeyMut);
+  const [{}, removeTopSoftkeyM] = useMutation<any, removeTopSoftkeyVariables>(removeTopSoftkeyMut);
+  const [{}, addSoftkeyM] = useMutation<any, addSoftkeyVariables>(addSoftkeyMut);
+  const [{}, updateSoftkeyM] = useMutation<any, updateSoftkeyVariables>(updateSoftkeyMut);
+  const [{}, removeSoftkeyM] = useMutation<any, removeSoftkeyVariables>(removeSoftkeyMut);
+  const [{}, copyToAllM] = useMutation<any, copyToAllVariables>(copyToAllMut);
+  const [{}, transferConfigM] = useMutation<any, transferConfigVariables>(transferConfigMut);
+  const [{}, importConfig] = useMutation<any, importFromPhoneVariables>(importFromPhone);
+  const [{}, moveSoftkey] = useMutation<any, moveSoftkeyVariables>(moveSoftkeyMut);
+  const [{}, moveTopSoftkey] = useMutation<any, moveTopSoftkeyVariables>(moveTopSoftkeyMut);
+  const [{ fetching: updateFetching }, updatePhone] = useMutation<any, updatePhoneVariables>(
     updatePhoneMut
   );
 
   const move = useCallback(
     async (from: string, to: string) => {
       const view: "topSoftkeys" | "softkeys" = activeView === "top_softkeys" ? "topSoftkeys" : "softkeys";
-      const prev: CommonSoftkey[] = phone[view];
+      const prev = phone[view];
       try {
-        const next: CommonSoftkey[] = phone[view].slice();
+        const next: { id: string }[] = phone[view].slice();
         const movedIndex = next.findIndex(p => p.id === from);
         const toIndex = next.findIndex(p => p.id === to);
         const moved = next.splice(movedIndex, 1)[0];
@@ -261,48 +265,23 @@ export function PhoneConfig({ phone }: Props) {
           </li>
         </ul>
       </nav>
-      <DnD
-        handle={({ ...props }) => (
-          <button
-            class={clsx("btn btn-action", { settingSoftkey })}
-            type="button"
-            {...props}
-          >
-            <i class="icon icon-resize-vert" />
-          </button>
-        )}
-        container={({ children, ...props }) => (
-          <div class="panel-body" {...props}>
-            {children}
-          </div>
-        )}
-        item={({ data, ...props }) =>
-          isTop ? (
-            <SoftkeyConfig
-              softkey={data}
-              set={updateTopSoftkey.bind(null, data.id)}
-              remove={removeTopSoftkey}
-              loading={settingSoftkey}
-              isTop={true}
-              {...props}
-            />
-          ) : (
-            <SoftkeyConfig
-              softkey={data}
-              set={updateSoftkey.bind(null, data.id)}
-              remove={removeSoftkey}
-              loading={settingSoftkey}
-              isTop={false}
-              {...props}
-            />
-          )
-        }
-        items={
-          isTop ? phone.topSoftkeys : phone.softkeys
-        }
-        prop="id"
-        onMove={move}
-      />
+      {isTop ? (
+        <TopSoftkeyDnD
+          isTop={isTop}
+          removeSoftkey={removeTopSoftkey}
+          updateSoftkey={updateTopSoftkey}
+          softkeys={phone.topSoftkeys}
+          settingSoftkey={settingSoftkey}
+          move={move} />
+      ) : (
+        <SoftkeyDnD
+          isTop={isTop}
+          removeSoftkey={removeSoftkey}
+          updateSoftkey={updateSoftkey}
+          softkeys={phone.softkeys}
+          settingSoftkey={settingSoftkey}
+          move={move} />
+      )}
       <div class="panel-footer">
         <div class="btn-group btn-group-block popover popover-with-trigger">
           <Localizer>
@@ -325,14 +304,14 @@ export function PhoneConfig({ phone }: Props) {
           </button>
           {isTop ? (
             <TopSoftkeyPopover
-              softkey={{ type: TopSoftkeyTypes.None, id: "new" }}
+              softkey={{ type: TopSoftkeyTypes.None, id: "new", label: "", value: "" }}
               isNew={true}
               set={addTopSoftkey}
               loading={settingSoftkey}
             />
           ) : (
             <SoftkeyPopover
-              softkey={{ type: SoftkeyTypes.None, id: "new" }}
+              softkey={{ type: SoftkeyTypes.None, id: "new", label: "", value: "" }}
               isNew={true}
               set={addSoftkey}
               loading={settingSoftkey}
@@ -367,3 +346,60 @@ export function PhoneConfig({ phone }: Props) {
     </div>
   );
 }
+
+interface SoftkeyDnDProps<Top extends boolean> {
+  isTop: Top,
+  settingSoftkey: boolean,
+  updateSoftkey: (id: string, softkey: PickSoftkeyInput<Top>) => void,
+  removeSoftkey: (id: string) => void,
+  move: (from: string, to: string) => void,
+  softkeys: PickSoftkey<Top>[],
+}
+
+function SoftkeyDnD<Top extends boolean = false>({ settingSoftkey, updateSoftkey, removeSoftkey, softkeys, isTop, move }: SoftkeyDnDProps<Top>) {
+  return (
+    <DnD
+      handle={({ ...props }) => (
+        <button
+          class={clsx("btn btn-action", { settingSoftkey })}
+          type="button"
+          {...props}
+        >
+          <i class="icon icon-resize-vert" />
+        </button>
+      )}
+      container={({ children, ...props }) => (
+        <div class="panel-body" {...props}>
+          {children}
+        </div>
+      )}
+      item={({ data, ...props }) =>
+        (
+          <SoftkeyConfig
+            softkey={data}
+            set={updateSoftkey.bind(null, data.id)}
+            remove={removeSoftkey}
+            loading={settingSoftkey}
+            isTop={isTop}
+            {...props}
+          />
+        )
+      }
+      items={
+        softkeys
+      }
+      prop="id"
+      onMove={move}
+    />
+  );
+}
+
+const TopSoftkeyDnD: (props: SoftkeyDnDProps<true>) => VNode<any> = SoftkeyDnD;
+
+// type SoftkeyDndFn = typeof SoftkeyDnD;
+
+// const TopSoftkeyDnD: SoftkeyDndFn<true> = SoftkeyDnD;
+
+// function TopSoftkeyDnD(props: SoftkeyDnDProps<true>) {
+//   return SoftkeyDnD(props);
+// }

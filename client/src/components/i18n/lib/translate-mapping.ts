@@ -1,6 +1,6 @@
 import { assign, Obj, select } from "./util";
 import translate from "./translate";
-import { Text } from "../components/text";
+import { Text } from "..";
 import { toChildArray } from "preact";
 import { IntlContext } from "../components/intl-provider";
 
@@ -18,7 +18,7 @@ import { IntlContext } from "../components/intl-provider";
 export default function translateMapping(
   props: Obj | null | string,
   intl: IntlContext["intl"],
-  onlyTextNodes: boolean
+  onlyTextNodes: boolean = false
 ) {
   let out: Obj = {};
   intl = intl || {};

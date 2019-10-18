@@ -1,4 +1,5 @@
-import { company, CompanyQuery, CompanyQueryArgs, phoneStatus, PhoneStatusSubscription } from "../gql/index.gql";
+import { company as getCompany, phoneStatus as subPhoneStatus } from "../gql/index.gql";
+import { phoneStatus } from "../gql/gen/phoneStatus"
 import { Localizer, Text } from "./i18n";
 import { PhoneConfig } from "./phone-config-view";
 import { CompanyPhones } from "./company-phones";
@@ -6,6 +7,7 @@ import { Phone } from "preact-feather";
 import clsx from "clsx";
 import { useSubscriptionWithQuery } from "@pql/boost";
 import { useCallback, useState } from "preact/hooks";
+import { company, companyVariables } from "../gql/gen/company";
 
 interface Props {
   id: string;
@@ -16,18 +18,18 @@ export function CompanyView({ id, addCompany }: Props) {
   const [newName, setNewName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [{ data, fetching }] = useSubscriptionWithQuery<PhoneStatusSubscription, CompanyQuery, CompanyQueryArgs, {}>(
+  const [{ data, fetching }] = useSubscriptionWithQuery<phoneStatus, company, companyVariables, {}>(
     {
       query: {
-        query: company,
+        query: getCompany,
         variables: { id }
       },
       subscription: {
-        query: phoneStatus
+        query: subPhoneStatus
       }
     },
     (data, next) => {
-      const phone = data.company.phones.find(
+      const phone = data.company!.phones.find(
         phone => phone.id === next.phoneStatus.phone.id
       );
       if (phone && phone.status !== next.phoneStatus.phone.status)

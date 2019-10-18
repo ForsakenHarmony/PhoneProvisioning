@@ -1,12 +1,4 @@
 import { gql } from "@pql/macro";
-import {
-  Company,
-  Phone,
-  PhoneInput,
-  SoftkeyInput,
-  TopSoftkeyInput,
-  RawCompany
-} from "./types";
 
 export const companies = gql`
   query companies {
@@ -38,10 +30,6 @@ export const companies = gql`
   }
 `;
 
-export interface CompaniesQuery {
-  companies: Company[];
-}
-
 export const company = gql`
   query company($id: ID!) {
     company(companyId: $id) {
@@ -71,14 +59,6 @@ export const company = gql`
     }
   }
 `;
-
-export interface CompanyQueryArgs {
-  id: string;
-}
-
-export interface CompanyQuery {
-  company: Company;
-}
 
 export const addCompany = gql`
   mutation addCompany($name: String!) {
@@ -110,19 +90,11 @@ export const addCompany = gql`
   }
 `;
 
-export interface AddCompanyMutationArgs {
-  name: string;
-}
-
 export const setActiveCompany = gql`
   mutation setActiveCompany($id: ID!) {
     setActiveCompany(companyId: $id)
   }
 `;
-
-export interface SetActiveCompanyMutationArgs {
-  id: string;
-}
 
 export const addPhone = gql`
   mutation addPhone($companyId: ID!, $phone: PhoneInput!) {
@@ -153,11 +125,6 @@ export const addPhone = gql`
   }
 `;
 
-export interface AddPhoneMutationArgs {
-  companyId: string;
-  phone: PhoneInput;
-}
-
 export const movePhones = gql`
   mutation movePhones($from: ID!, $to: ID!) {
     movePhones(from: $from, to: $to) {
@@ -168,11 +135,6 @@ export const movePhones = gql`
     }
   }
 `;
-
-export interface MovePhoneMutationArgs {
-  from: string;
-  to: string;
-}
 
 export const copyToAll = gql`
   mutation copyToAll($phoneId: ID!) {
@@ -185,10 +147,6 @@ export const copyToAll = gql`
   }
 `;
 
-export interface CopyToAllMutationArgs {
-  phoneId: string;
-}
-
 export const removePhone = gql`
   mutation removePhone($id: ID!) {
     removePhone(id: $id) {
@@ -196,10 +154,6 @@ export const removePhone = gql`
     }
   }
 `;
-
-export interface RemovePhoneMutationArgs {
-  id: string;
-}
 
 export const updatePhone = gql`
   mutation updatePhone($id: ID!, $phone: PhoneInput!) {
@@ -211,11 +165,6 @@ export const updatePhone = gql`
     }
   }
 `;
-
-export interface UpdatePhoneMutationArgs {
-  id: string;
-  phone: PhoneInput;
-}
 
 export const addTopSoftkey = gql`
   mutation addTopSoftkey($phoneId: ID!, $softkey: TopSoftkeyInput!) {
@@ -232,11 +181,6 @@ export const addTopSoftkey = gql`
   }
 `;
 
-export interface AddTopSoftkeyMutationArgs {
-  phoneId: string;
-  softkey: TopSoftkeyInput;
-}
-
 export const removeTopSoftkey = gql`
   mutation removeTopSoftkey($id: ID!) {
     removeTopSoftkey(id: $id) {
@@ -244,10 +188,6 @@ export const removeTopSoftkey = gql`
     }
   }
 `;
-
-export interface RemoveTopSoftkeyMutationArgs {
-  id: string;
-}
 
 export const updateTopSoftkey = gql`
   mutation updateTopSoftkey($id: ID!, $softkey: TopSoftkeyInput!) {
@@ -259,11 +199,6 @@ export const updateTopSoftkey = gql`
     }
   }
 `;
-
-export interface UpdateTopSoftkeyMutationArgs {
-  id: string;
-  softkey: TopSoftkeyInput;
-}
 
 export const addSoftkey = gql`
   mutation addSoftkey($phoneId: ID!, $softkey: SoftkeyInput!) {
@@ -280,11 +215,6 @@ export const addSoftkey = gql`
   }
 `;
 
-export interface AddSoftkeyMutationArgs {
-  phoneId: string;
-  softkey: SoftkeyInput;
-}
-
 export const removeSoftkey = gql`
   mutation removeSoftkey($id: ID!) {
     removeSoftkey(id: $id) {
@@ -292,10 +222,6 @@ export const removeSoftkey = gql`
     }
   }
 `;
-
-export interface RemoveSoftkeyMutationArgs {
-  id: string;
-}
 
 export const updateSoftkey = gql`
   mutation updateSoftkey($id: ID!, $softkey: SoftkeyInput!) {
@@ -308,11 +234,6 @@ export const updateSoftkey = gql`
   }
 `;
 
-export interface UpdateSoftkeyMutationArgs {
-  id: string;
-  softkey: SoftkeyInput;
-}
-
 export const moveSoftkey = gql`
   mutation moveSoftkey($from: ID!, $to: ID!) {
     moveSoftkey(from: $from, to: $to) {
@@ -323,11 +244,6 @@ export const moveSoftkey = gql`
     }
   }
 `;
-
-export interface MoveSoftkeyMutationArgs {
-  from: string;
-  to: string;
-}
 
 export const moveTopSoftkey = gql`
   mutation moveTopSoftkey($from: ID!, $to: ID!) {
@@ -340,30 +256,17 @@ export const moveTopSoftkey = gql`
   }
 `;
 
-export interface MoveTopSoftkeyMutationArgs {
-  from: string;
-  to: string;
-}
-
 export const transferConfig = gql`
   mutation transferConfig($phoneId: ID!) {
     transferConfigToPhone(phoneId: $phoneId)
   }
 `;
 
-export interface TransferConfigMutationArgs {
-  phoneId: string;
-}
-
 export const transferConfigToAll = gql`
-  mutation transferConfig($companyId: ID!) {
+  mutation transferConfigToAll($companyId: ID!) {
     transferConfigToPhones(companyId: $companyId)
   }
 `;
-
-export interface TransferConfigToAllMutationArgs {
-  companyId: string;
-}
 
 export const phoneStatus = gql`
   subscription phoneStatus {
@@ -393,13 +296,6 @@ export const phoneStatus = gql`
     }
   }
 `;
-
-export interface PhoneStatusSubscription {
-  phoneStatus: {
-    phone: Phone;
-    date: string;
-  };
-}
 
 export const exportCompany = gql`
   mutation exportCompany($companyId: ID!) {
@@ -434,10 +330,6 @@ export const exportCompany = gql`
   }
 `;
 
-export interface ExportCompanyMutationArgs {
-  companyId: string;
-}
-
 export const importCompany = gql`
   mutation importCompany($company: RawCompanyInput!) {
     importCompany(company: $company) {
@@ -445,10 +337,6 @@ export const importCompany = gql`
     }
   }
 `;
-
-export interface ImportCompanyMutationArgs {
-  company: RawCompany;
-}
 
 export const removeCompany = gql`
   mutation removeCompany($companyId: ID!) {
@@ -458,10 +346,6 @@ export const removeCompany = gql`
   }
 `;
 
-export interface RemoveCompanyMutationArgs {
-  companyId: string;
-}
-
 export const importFromPhone = gql`
   mutation importFromPhone($id: ID!) {
     importConfigFromPhone(id: $id) {
@@ -469,10 +353,6 @@ export const importFromPhone = gql`
     }
   }
 `;
-
-export interface ImportFromPhoneMutationArgs {
-  id: string;
-}
 
 export const findPhones = gql`
   mutation findPhones($companyId: ID!) {
@@ -503,7 +383,3 @@ export const findPhones = gql`
     }
   }
 `;
-
-export interface FindPhonesMutationArgs {
-  companyId: string;
-}

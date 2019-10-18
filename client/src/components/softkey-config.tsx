@@ -11,8 +11,12 @@ import {
 } from "../constants";
 import { isLabelDisabled, isValueDisabled, Obj } from "../utils";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { Softkey, TopSoftkey } from "../gql/types";
 import { VNode } from "preact";
+import { SoftkeyInput, TopSoftkeyInput } from "../gql/gen/globalTypes";
+import {
+  company_company_phones_softkeys,
+  company_company_phones_topSoftkeys
+} from "../gql/gen/company";
 
 interface SoftkeyPopoverProps<Top extends boolean> {
   softkey: PickSoftkey<Top>,
@@ -138,7 +142,8 @@ export const SoftkeyPopover = createSoftkeyPopover<false>(
   EnumToSoftkey
 );
 
-type PickSoftkey<T extends boolean> = T extends true ? TopSoftkey : Softkey;
+export type PickSoftkey<T extends boolean> = T extends true ? company_company_phones_topSoftkeys : company_company_phones_softkeys;
+export type PickSoftkeyInput<T extends boolean> = T extends true ? TopSoftkeyInput : SoftkeyInput;
 
 interface SoftkeyConfigProps<Top extends boolean> {
   softkey: PickSoftkey<Top>,

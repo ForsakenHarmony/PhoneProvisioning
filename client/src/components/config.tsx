@@ -2,7 +2,7 @@ import { Localizer, Text } from "./i18n";
 
 import {
   addCompany as addCompanyMut,
-  companies,
+  companies as getCompanies,
   exportCompany as exportCompanyMut,
   importCompany as importCompanyMut,
   removeCompany as removeCompanyMut,
@@ -12,8 +12,8 @@ import { CompanyView } from "./companyView";
 import { Download, Trash, Upload } from "preact-feather";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { useQuery, useMutation } from "@pql/boost";
-import { Company } from "../gql/types";
 import { Obj } from "../utils";
+import { companies } from "../gql/gen/companies";
 
 function useFilePicker(cb: (files: FileList) => void) {
   // const [open, setOpen] = useState(() => {});
@@ -75,7 +75,7 @@ function removeTypename(thing: Obj): Obj {
 export function Config() {
   const [selectedCompany, setSelectedCompany] = useState("");
 
-  const [{ data, fetching }, refetch] = useQuery({ query: companies });
+  const [{ data, fetching }, refetch] = useQuery<companies>({ query: getCompanies });
 
   const [{}, setActive] = useMutation(setActiveCompanyMut);
   const [{}, addC] = useMutation(addCompanyMut);
@@ -102,7 +102,7 @@ export function Config() {
       data &&
       (selectedCompany === "" ||
         (selectedCompany !== "new" &&
-          !data.companies.find((c: Company) => c.id === selectedCompany)))
+          !data.companies.find(c => c.id === selectedCompany)))
     ) {
       setSelected((data.companies[0] || {}).id || "new");
     }
@@ -170,7 +170,7 @@ export function Config() {
                 <Text id="loading" />
               </option>
             ) : (
-              data.companies.map((c: Company) => <option value={c.id}>{c.name}</option>)
+              data.companies.map(c => <option value={c.id}>{c.name}</option>)
             )}
             <option value={"new"}>
               <Text id="new_company" />

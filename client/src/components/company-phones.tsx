@@ -3,53 +3,53 @@ import { DnD } from "./dnd";
 import { PhoneView } from "./phone-view";
 import {
   addPhone,
-  AddPhoneMutationArgs,
   removePhone,
-  RemovePhoneMutationArgs,
   movePhones,
-  MovePhoneMutationArgs,
   transferConfigToAll,
-  TransferConfigToAllMutationArgs,
   updatePhone,
-  UpdatePhoneMutationArgs,
-  findPhones,
-  FindPhonesMutationArgs
+  findPhones
 } from "../gql/index.gql";
 import clsx from "clsx";
 import { useMutation } from "@pql/boost";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import genUUID from "uuid/v4";
-import { Company, Phone } from "../gql/types";
 import { EventWithValue } from "../utils";
+import { company_company, company_company_phones } from "../gql/gen/company";
+import { addPhoneVariables } from "../gql/gen/addPhone";
+import { removePhoneVariables } from "../gql/gen/removePhone";
+import { movePhonesVariables } from "../gql/gen/movePhones";
+import { transferConfigToAllVariables } from "../gql/gen/transferConfigToAll";
+import { updatePhoneVariables } from "../gql/gen/updatePhone";
+import { findPhonesVariables } from "../gql/gen/findPhones";
 
 interface Props {
-  company: Company;
+  company: company_company;
 }
 
 export function CompanyPhones({ company }: Props) {
   const [{ fetching: addFetching }, addPhoneMut] = useMutation<
     any,
-    AddPhoneMutationArgs
+    addPhoneVariables
   >(addPhone);
   const [{ fetching: removeFetching }, removePhoneMut] = useMutation<
     any,
-    RemovePhoneMutationArgs
+    removePhoneVariables
   >(removePhone);
   const [{ fetching: moveFetching }, movePhonesMut] = useMutation<
     any,
-    MovePhoneMutationArgs
+    movePhonesVariables
   >(movePhones);
   const [{ fetching: transferFetching }, transferMut] = useMutation<
     any,
-    TransferConfigToAllMutationArgs
+    transferConfigToAllVariables
   >(transferConfigToAll);
   const [{ fetching: updateFetching }, updatePhoneMut] = useMutation<
     any,
-    UpdatePhoneMutationArgs
+    updatePhoneVariables
   >(updatePhone);
   const [{ fetching: findFetching }, findPhonesMut] = useMutation<
     any,
-    FindPhonesMutationArgs
+    findPhonesVariables
   >(findPhones);
 
   const loading =
@@ -73,7 +73,7 @@ export function CompanyPhones({ company }: Props) {
     async function addPhone() {
       if (!phoneState.name || !phoneState.number || addFetching || skipThing)
         return;
-      company.phones.push((phoneState as unknown) as Phone);
+      company.phones.push((phoneState as unknown) as company_company_phones);
       setSkipThing(true);
       try {
         setState({
@@ -87,10 +87,9 @@ export function CompanyPhones({ company }: Props) {
           companyId: company.id,
           phone: {
             id,
-            mac: mac!,
+            mac,
             name: name!,
-            number: number!,
-            skipContacts: false
+            number: number!
           }
         });
         setError(null);

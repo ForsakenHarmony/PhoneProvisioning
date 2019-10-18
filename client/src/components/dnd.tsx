@@ -1,6 +1,8 @@
 import { Component, RenderableProps, VNode, ComponentChildren } from "preact";
-import { JSXInternal } from "preact/src/jsx";
-import EventHandler = JSXInternal.EventHandler;
+
+interface EventHandler<E extends Event> {
+  (event: E): void;
+}
 
 interface HandleProps {
   onMouseDown: EventHandler<any>;

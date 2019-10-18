@@ -1,6 +1,7 @@
-import { h } from "preact";
+import { ComponentType, h } from "preact";
 import translateMapping from "../lib/translate-mapping";
-import { assign } from "../lib/util";
+import { assign, Obj } from "../lib/util";
+import { IntlContext } from "./intl-provider";
 
 /** `@withText()` is a Higher Order Component, often used as a decorator.
  *
@@ -46,9 +47,9 @@ import { assign } from "../lib/util";
  *	const WrappedFoo = withText('user.placeholer')(Foo);
  *	WrappedFoo.getWrappedComponent() === Foo; // true
  */
-export function withText(mapping) {
-  return function withTextWrapper(Child) {
-    function WithTextWrapper(props, context) {
+export function withText(mapping: string | Function | Obj) {
+  return function withTextWrapper(Child: ComponentType) {
+    function WithTextWrapper(props: Obj, context: IntlContext) {
       let map =
         typeof mapping === "function" ? mapping(props, context) : mapping;
       let translations = translateMapping(map, context.intl);
@@ -56,6 +57,7 @@ export function withText(mapping) {
     }
 
     WithTextWrapper.getWrappedComponent =
+      // @ts-ignore
       (Child && Child.getWrappedComponent) || (() => Child);
     return WithTextWrapper;
   };

@@ -6,13 +6,15 @@
   "scripts": {
     "build": "preact build --dest ../gql/dist/public --no-sw --no-prerender",
     "dev": "preact watch",
-    "prettier": "prettier src/**/*.{js,css,json,ts,tsx} --write"
+    "prettier": "prettier src/**/*.{js,css,json,ts,tsx} --write",
+    "codegen": "apollo client:codegen --excludes=node_modules/* --includes=**/*.gql.ts --localSchemaFile=../schema.graphql --target typescript --tagName=gql --outputFlat --namespace=namespace --no-addTypename  src/gql/gen"
   },
   "devDependencies": {
+    "apollo": "^2.19.1",
     "preact-cli": "^3.0.0-rc.5",
     "prettier": "^1.18.2",
-    "typescript": "^3.6.4",
-    "ts-graphql-plugin": "^1.3.0"
+    "ts-graphql-plugin": "^1.3.0",
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "@pql/boost": "^0.2.0-alpha.18",
@@ -21,13 +23,13 @@
     "clsx": "^1.0.4",
     "graphql": "^14.5.8",
     "preact": "^10.0.0",
-    "preact-feather": "^3.2.0",
+    "preact-feather": "^4.0.0",
     "preact-i18n": "^2.0.0-preactx.2",
+    "preact-robot": "^0.2.1",
     "preact-router": "^3.0.1",
+    "robot3": "^0.2.9",
     "spectre.css": "^0.5.8",
     "uuid": "^3.3.3",
-    "wouter": "^2.3.0",
-    "robot3": "^0.2.9",
-    "preact-robot": "^0.2.1"
+    "wouter": "^2.3.1"
   }
 }

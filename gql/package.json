@@ -19,7 +19,7 @@
     "apollo-server": "^2.9.6",
     "arpping": "^0.2.0",
     "axios": "^0.19.0",
-    "class-transformer": "^0.2.3",
+    "class-transformer": "^0.3.1",
     "class-validator": "^0.10.1",
     "express": "^4.17.1",
     "flru": "^1.0.2",

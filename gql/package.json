@@ -27,7 +27,7 @@
     "open": "^6.4.0",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^4.1.0",
-    "type-graphql": "^0.17.5",
+    "type-graphql": "^0.17.6",
     "typedi": "^0.8.0",
     "typeorm": "^0.2.19",
     "typeorm-typedi-extensions": "^0.2.3"

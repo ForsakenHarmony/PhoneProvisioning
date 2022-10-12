@@ -16,7 +16,7 @@
     "prettier": "prettier src/**/*.{ts,js,json} --write"
   },
   "dependencies": {
-    "apollo-server": "^2.9.6",
+    "apollo-server": "^2.25.4",
     "arpping": "^0.2.0",
     "axios": "^0.19.0",
     "class-transformer": "^0.2.3",
